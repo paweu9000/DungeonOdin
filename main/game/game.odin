@@ -10,7 +10,8 @@ Game :: struct {
     height: i32,
     textures: map[string][dynamic]RL.Texture2D,
     actors: [dynamic]^Actor,
-    player: ^Player
+    player: ^Player,
+    deltaTime: f32
 }
 
 game := new(Game)
@@ -31,6 +32,7 @@ init :: proc() {
 
 runLoop :: proc() {
     for !RL.WindowShouldClose() {
+        game.deltaTime = RL.GetFrameTime()
         processInput()
         update()
         draw()

@@ -2,6 +2,7 @@ package GAME
 
 import RL "vendor:raylib"
 import "core:fmt"
+import "core:strings"
 
 Type :: enum {
     ENEMY, PLAYER
@@ -44,6 +45,8 @@ Enemy :: struct {
 update_actor :: proc(actor: ^Actor){
     process_player_input(actor)
     process_actor_state(actor)
+    update_textures(actor)
+    update_frame(actor)
     actor.mDrawOrder = int(actor.mHitbox.y)
 }
 
@@ -107,4 +110,48 @@ process_player_input :: proc(player: ^Actor) {
     else {player.mState = State.IDLE}
 }
 
-generate_texture_name :: proc()
+update_textures :: proc(actor: ^Actor) {
+    actor.mTextures = game.textures[generate_texture_name(actor)]
+}
+
+update_frame :: proc(actor: ^Actor) {
+    if int(actor.mFrame) < len(actor.mTextures) {
+        actor.mFrame += game.deltaTime * f32(len(actor.mTextures)) * actor.mMovementSpeed
+    }
+    if int(actor.mFrame) > len(actor.mTextures)-1 {actor.mFrame = 0}
+    actor.mCurrentTexture = actor.mTextures[int(actor.mFrame)]
+}
+
+generate_texture_name :: proc(actor: ^Actor) -> string {
+    part1 := actor.mType == Type.PLAYER ? "player_" : ""
+    part2: string
+    switch actor.mState {
+        case State.IDLE:
+            part2 = "idle_";
+        case State.MOVE:
+            part2 = "walk_";
+        case State.ATTACK:
+            part2 = "attack_";
+    }
+    part3: string
+    switch (actor.mDirection)
+    {
+        case Direction.N:
+            part3 = "N";
+        case Direction.W:
+            part3 = "W";
+        case Direction.E:
+            part3 = "E";
+        case Direction.S:
+           part3 = "S";
+        case Direction.NE:
+            part3 = "NE";
+        case Direction.NW:
+            part3 = "NW";
+        case Direction.SE:
+            part3 = "SE";
+        case Direction.SW:
+            part3 = "SW";
+    }
+    return strings.concatenate({part1, part2, part3})
+}
