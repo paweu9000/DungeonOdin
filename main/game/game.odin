@@ -1,4 +1,4 @@
-package game
+package GAME
 
 import RL "vendor:raylib"
 import "core:fmt"
@@ -8,7 +8,9 @@ import "core:strings"
 Game :: struct {
     width: i32,
     height: i32,
-    textures: map[string][dynamic]RL.Texture2D
+    textures: map[string][dynamic]RL.Texture2D,
+    actors: [dynamic]^Actor,
+    player: ^Player
 }
 
 game := new(Game)
@@ -20,25 +22,29 @@ init :: proc() {
     RL.SetWindowState({.WINDOW_RESIZABLE, .VSYNC_HINT, .FULLSCREEN_MODE});
     RL.InitWindow(game.width, game.height, "Dungeon");
     RL.SetTargetFPS(144);
+    drawLoadingScreen()
+    loadAllTextures()
+    player := createPlayer()
+    append(&game.actors, player);
+    game.player = player
 }
 
 runLoop :: proc() {
-    drawLoadingScreen()
-    loadAllTextures()
     for !RL.WindowShouldClose() {
-        processState()
+        processInput()
         update()
         draw()
     }
     RL.CloseWindow();
 }
 
-processState :: proc() {
-
+processInput :: proc() {
 }
 
 update :: proc() {
-
+    for act in game.actors {
+        update_actor(act)
+    }
 }
 
 drawLoadingScreen :: proc() {
@@ -51,7 +57,10 @@ drawLoadingScreen :: proc() {
 draw :: proc() {
     RL.BeginDrawing();
     RL.ClearBackground(RL.LIGHTGRAY);
-    RL.DrawRectangleRec({900, 500, 50, 50}, RL.RED);
+    for act in game.actors {
+        draw_actor(act)
+    }
+    RL.DrawFPS(10, 10)
     RL.EndDrawing();
 }
 
