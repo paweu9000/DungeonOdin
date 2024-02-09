@@ -4,6 +4,7 @@ import RL "vendor:raylib"
 import "core:fmt"
 import "core:os"
 import "core:strings"
+import "core:slice"
 
 Game :: struct {
     width: i32,
@@ -49,6 +50,7 @@ update :: proc() {
     for act in game.actors {
         update_actor(act)
     }
+    sortByDrawOrder()
 }
 
 drawLoadingScreen :: proc() {
@@ -56,6 +58,12 @@ drawLoadingScreen :: proc() {
     RL.ClearBackground(RL.LIGHTGRAY);
     RL.DrawText("LOADING ASSETS...", game.width/3, game.height/3, 32, RL.BLACK)
     RL.EndDrawing();
+}
+
+sortByDrawOrder :: proc() {
+    slice.sort_by(game.actors[:], proc(ac1, ac2: ^Actor) -> bool {
+        return ac1.mDrawOrder < ac2.mDrawOrder
+    })
 }
 
 draw :: proc() {
