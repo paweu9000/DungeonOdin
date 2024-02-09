@@ -20,14 +20,16 @@ init :: proc() {
     game.width = 1600
     game.height = 900
     game.textures = make(map[string][dynamic]RL.Texture2D)
-    RL.SetWindowState({.WINDOW_RESIZABLE, .VSYNC_HINT, .FULLSCREEN_MODE});
-    RL.InitWindow(game.width, game.height, "Dungeon");
+    RL.SetWindowState({.WINDOW_RESIZABLE, .VSYNC_HINT, .FULLSCREEN_MODE})
+    RL.InitWindow(game.width, game.height, "Dungeon")
     RL.SetTargetFPS(144);
     drawLoadingScreen()
     loadAllTextures()
     player := createPlayer()
-    append(&game.actors, player);
+    append(&game.actors, player)
     game.player = player
+    enemy := createEnemy(MonsterCategory.SKELETON)
+    append(&game.actors, enemy)
 }
 
 runLoop :: proc() {
