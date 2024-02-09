@@ -16,6 +16,10 @@ State :: enum {
     ATTACK, IDLE, MOVE
 }
 
+MonsterCategory :: enum {
+    SKELETON, SLIME
+}
+
 Hitbox :: struct {
     x, y: i32,
     radius: f32,
@@ -39,11 +43,14 @@ Player :: struct {
 }
 
 Enemy :: struct {
-    using actor: Actor
+    using actor: Actor,
+    mCategory: MonsterCategory
 }
 
 update_actor :: proc(actor: ^Actor){
-    process_player_input(actor)
+    if actor.mType == Type.PLAYER {
+        process_player_input(actor)
+    }
     process_actor_state(actor)
     update_textures(actor)
     update_frame(actor)
@@ -67,6 +74,21 @@ createPlayer :: proc() -> ^Player {
     player.mFrame = 0;
     player.mCurrentTexture = player.mTextures[0];
     return player
+}
+
+createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
+    enemy := new(Enemy)
+    enemy.mDirection = Direction.S
+    enemy.mState = State.IDLE
+    enemy.mType = Type.ENEMY
+    enemy.mCategory = category
+    enemy.mMovementSpeed = 0.6
+    enemy.mMass = 2.0
+    enemy.mHitbox = Hitbox{RL.GetRandomValue(30, 1500), RL.GetRandomValue(30, 800), 10, RL.RED}
+    enemy.mTextures = game.textures["skeleton_idle_S"]
+    enemy.mFrame = 0
+    enemy.mCurrentTexture = enemy.mTextures[0]
+    return enemy
 }
 
 process_actor_state :: proc(actor: ^Actor) {
@@ -123,7 +145,13 @@ update_frame :: proc(actor: ^Actor) {
 }
 
 generate_texture_name :: proc(actor: ^Actor) -> string {
-    part1 := actor.mType == Type.PLAYER ? "player_" : ""
+    part1: string
+    switch actor.mType {
+        case Type.PLAYER:
+            part1 = "player_"
+        case Type.ENEMY:
+            part1 = "skeleton_"
+    }
     part2: string
     switch actor.mState {
         case State.IDLE:
