@@ -31,6 +31,10 @@ init :: proc() {
     game.player = player
     enemy := createEnemy(MonsterCategory.SKELETON)
     append(&game.actors, enemy)
+    enemy1 := createEnemy(MonsterCategory.SKELETON)
+    append(&game.actors, enemy1)
+    enemy2 := createEnemy(MonsterCategory.SKELETON)
+    append(&game.actors, enemy2)
 }
 
 runLoop :: proc() {
@@ -50,6 +54,7 @@ update :: proc() {
     for act in game.actors {
         update_actor(act)
     }
+    checkForCollision()
     sortByDrawOrder()
 }
 
@@ -157,6 +162,21 @@ loadDirTextures :: proc(game: ^Game, path: string, name: string) {
         append(&textures, new_tex)
     }
     game.textures[name] = textures
+}
+
+checkForCollision :: proc() {
+    for ac1 in game.actors {
+        for ac2 in game.actors {
+            if ac1 == ac2 {continue}
+            if doHitboxOverlap(ac1.mHitbox, ac2.mHitbox)
+            {
+                result := calculateForce(ac1.mHitbox, ac2.mHitbox)
+                applyForce(ac1, result.v1)
+                applyForce(ac2, result.v2)
+                dynamicCollision(ac1, ac2)
+            }
+        }
+    }
 }
 
 

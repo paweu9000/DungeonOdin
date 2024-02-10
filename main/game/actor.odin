@@ -21,7 +21,7 @@ MonsterCategory :: enum {
 }
 
 Hitbox :: struct {
-    x, y: i32,
+    x, y: f32,
     radius: f32,
     color: RL.Color
 }
@@ -51,6 +51,9 @@ update_actor :: proc(actor: ^Actor){
     if actor.mType == Type.PLAYER {
         process_player_input(actor)
     }
+    else {
+        checkEnemyState(actor)
+    }
     process_actor_state(actor)
     update_textures(actor)
     update_frame(actor)
@@ -59,8 +62,8 @@ update_actor :: proc(actor: ^Actor){
 
 draw_actor :: proc(actor: ^Actor) {
     circle := actor.mHitbox
-    RL.DrawCircle(circle.x, circle.y, circle.radius, circle.color)
-    RL.DrawTexture(actor.mCurrentTexture, circle.x-128, circle.y-127, RL.WHITE)
+    RL.DrawCircle(i32(circle.x), i32(circle.y), circle.radius, circle.color)
+    RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
 }
 
 createPlayer :: proc() -> ^Player {
@@ -84,7 +87,8 @@ createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
     enemy.mCategory = category
     enemy.mMovementSpeed = 0.6
     enemy.mMass = 2.0
-    enemy.mHitbox = Hitbox{RL.GetRandomValue(30, 1500), RL.GetRandomValue(30, 800), 10, RL.RED}
+    enemy.mHitbox = Hitbox{f32(RL.GetRandomValue(30, 1500)), f32(RL.GetRandomValue(30, 800)), 10, RL.RED}
+    // enemy.mHitbox = Hitbox{500, 500, 10, RL.RED}
     enemy.mTextures = game.textures["skeleton_idle_S"]
     enemy.mFrame = 0
     enemy.mCurrentTexture = enemy.mTextures[0]
@@ -113,8 +117,8 @@ process_actor_state :: proc(actor: ^Actor) {
         case Direction.SW:
             actor.mVelocity = RL.Vector2{-ms, ms};
     }
-    actor.mHitbox.x = hb.x + i32(actor.mVelocity[0])
-    actor.mHitbox.y = hb.y + i32(actor.mVelocity[1])
+    actor.mHitbox.x = hb.x + actor.mVelocity[0]
+    actor.mHitbox.y = hb.y + actor.mVelocity[1]
 }
 
 process_player_input :: proc(player: ^Actor) {
@@ -138,7 +142,7 @@ update_textures :: proc(actor: ^Actor) {
 
 update_frame :: proc(actor: ^Actor) {
     if int(actor.mFrame) < len(actor.mTextures) {
-        actor.mFrame += game.deltaTime * f32(len(actor.mTextures)) * actor.mMovementSpeed
+        actor.mFrame += game.deltaTime * f32(len(actor.mTextures)) * actor.mMovementSpeed * 1.5
     }
     if int(actor.mFrame) > len(actor.mTextures)-1 {actor.mFrame = 0}
     actor.mCurrentTexture = actor.mTextures[int(actor.mFrame)]
@@ -182,4 +186,29 @@ generate_texture_name :: proc(actor: ^Actor) -> string {
             part3 = "SW";
     }
     return strings.concatenate({part1, part2, part3})
+}
+
+applyForce :: proc(actor: ^Actor, force: RL.Vector2)
+{
+    actor.mHitbox.x = force.x
+    actor.mHitbox.y = force.y
+}
+
+checkEnemyState :: proc(enemy: ^Actor)
+{
+    player_hb := RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
+    enemy_hb := RL.Vector2{enemy.mHitbox.x, enemy.mHitbox.y}
+    sub_enemy_hb := enemy_hb - player_hb
+    res := sub_enemy_hb.x * sub_enemy_hb.x + sub_enemy_hb.y * sub_enemy_hb.y
+    if  res > 75000 {
+        enemy.mState = State.IDLE
+        return
+    }
+    else if res < 1300 {
+        enemy.mState = State.ATTACK
+    }
+    else {
+        enemy.mState = State.MOVE
+    }
+    enemy.mDirection = calculateDirection(enemy_hb, player_hb)
 }
