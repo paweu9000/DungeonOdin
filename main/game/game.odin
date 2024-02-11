@@ -12,7 +12,8 @@ Game :: struct {
     textures: map[string][dynamic]RL.Texture2D,
     actors: [dynamic]^Actor,
     player: ^Player,
-    deltaTime: f32
+    deltaTime: f32,
+    level: ^Level
 }
 
 game := new(Game)
@@ -26,6 +27,7 @@ init :: proc() {
     RL.SetTargetFPS(144);
     drawLoadingScreen()
     loadAllTextures()
+    game.level = initLevel()
     player := createPlayer()
     append(&game.actors, player)
     game.player = player
@@ -74,6 +76,7 @@ sortByDrawOrder :: proc() {
 draw :: proc() {
     RL.BeginDrawing();
     RL.ClearBackground(RL.LIGHTGRAY);
+    drawLevel(game.level)
     for act in game.actors {
         draw_actor(act)
     }
