@@ -56,6 +56,7 @@ update :: proc() {
     for act in game.actors {
         update_actor(act)
     }
+    processWallCollision()
     checkForCollision()
     sortByDrawOrder()
 }
@@ -182,4 +183,11 @@ checkForCollision :: proc() {
     }
 }
 
-
+processWallCollision :: proc() {
+    for act in game.actors {
+        if checkForWallCollision(act, game.level) {
+            act.mHitbox.x -= act.mVelocity.x
+            act.mHitbox.y -= act.mVelocity.y
+        }
+    }
+}
