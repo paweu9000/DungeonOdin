@@ -59,3 +59,15 @@ drawLevel :: proc(level: ^Level) {
         }
     }
 }
+
+checkForWallCollision :: proc(actor: ^Actor, lvl: ^Level) -> bool {
+    actor_hb := actor.mHitbox
+    tileset := lvl.mLayers[1] //2nd layer
+    for tile in tileset.mTiles {
+        if RL.CheckCollisionCircleRec(RL.Vector2{actor_hb.x, actor_hb.y}, actor_hb.radius, tile.mHitbox)
+        {
+            return true
+        }
+    }
+    return false
+}
