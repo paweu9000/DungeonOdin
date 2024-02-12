@@ -76,3 +76,17 @@ dynamicCollision :: proc(ac1, ac2: ^Actor) {
 	ac1.mVelocity = RL.Vector2{tx * dpTan1 + nx * m1, ty * dpTan1 + ny * m1}
 	ac2.mVelocity = RL.Vector2{tx * dpTan2 + nx * m2, ty * dpTan2 + ny * m2}
 }
+
+calculateRotation :: proc(dir: Direction) -> f32 {
+    switch dir {
+        case Direction.N: return 270
+        case Direction.NE: return 315
+        case Direction.E: return 0
+        case Direction.SE: return 45
+        case Direction.S: return 90
+        case Direction.SW: return 135
+        case Direction.W: return 180
+        case Direction.NW: return 225
+        case: return 360
+    }
+}
