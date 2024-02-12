@@ -13,7 +13,8 @@ Game :: struct {
     actors: [dynamic]^Actor,
     player: ^Player,
     deltaTime: f32,
-    level: ^Level
+    level: ^Level,
+    showHitbox: bool
 }
 
 game := new(Game)
@@ -21,6 +22,7 @@ game := new(Game)
 init :: proc() {
     game.width = 1600
     game.height = 900
+    game.showHitbox = false
     game.textures = make(map[string][dynamic]RL.Texture2D)
     RL.SetWindowState({.WINDOW_RESIZABLE, .VSYNC_HINT, .FULLSCREEN_MODE})
     RL.InitWindow(game.width, game.height, "Dungeon")
@@ -50,6 +52,10 @@ runLoop :: proc() {
 }
 
 processInput :: proc() {
+    if (RL.IsKeyPressed(RL.KeyboardKey.H))
+    {
+        game.showHitbox = !game.showHitbox
+    }
 }
 
 update :: proc() {
@@ -154,6 +160,10 @@ loadAllTextures :: proc() {
     loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/SE/", "skeleton_attack_SE");
     loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/NW/", "skeleton_attack_NW");
     loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/SW/", "skeleton_attack_SW");
+
+    // PROPS
+    loadDirTextures(game, "/assets/prop/tiles/N/", "prop_tile_1_N")
+    loadDirTextures(game, "/assets/prop/tiles/SE/", "prop_tile_1_SE")
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {
