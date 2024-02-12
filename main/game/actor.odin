@@ -26,6 +26,16 @@ Hitbox :: struct {
     color: RL.Color
 }
 
+Component :: struct {
+    mTexture: RL.Texture2D,
+    mDirection: Direction,
+    mTextures: [dynamic]RL.Texture2D,
+    mFrame: f32,
+    mPos: RL.Vector2,
+    mVel: RL.Vector2,
+    mVec: RL.Vector2
+}
+
 Actor :: struct {
     mDrawOrder: int,
     mVelocity: RL.Vector2,
@@ -35,7 +45,8 @@ Actor :: struct {
     mTextures: [dynamic]RL.Texture2D,
     mCurrentTexture: RL.Texture2D,
     mHitbox: Hitbox,
-    mFrame, mMovementSpeed, mMass: f32
+    mFrame, mMovementSpeed, mMass: f32,
+    mComponents: [dynamic]^Component,
 }
 
 Player :: struct {
@@ -66,6 +77,13 @@ draw_actor :: proc(actor: ^Actor) {
         RL.DrawCircle(i32(circle.x), i32(circle.y), circle.radius, circle.color)
     }
     RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
+    for comp in actor.mComponents {
+        // RL.DrawTexture(comp.mTexture, i32(comp.mPos.x), i32(comp.mPos.y), RL.BLACK)
+        src := RL.Rectangle{0, 0, 256, 256}
+        dest := RL.Rectangle{comp.mPos.x, comp.mPos.y, 256, 256}
+        
+        RL.DrawTexturePro(comp.mTexture, src, dest, comp.mVec, calculateRotation(comp.mDirection), RL.BLACK)
+    }
 }
 
 createPlayer :: proc() -> ^Player {
@@ -148,6 +166,15 @@ update_frame :: proc(actor: ^Actor) {
     }
     if int(actor.mFrame) > len(actor.mTextures)-1 {actor.mFrame = 0}
     actor.mCurrentTexture = actor.mTextures[int(actor.mFrame)]
+    for i in 0..<len(actor.mComponents) {
+        actor.mComponents[i].mPos += actor.mComponents[i].mVel
+        actor.mComponents[i].mFrame += game.deltaTime * f32(len(actor.mComponents[i].mTextures)) * actor.mMovementSpeed * 5
+        if (int(actor.mComponents[i].mFrame) > len(actor.mComponents[i].mTextures)-1) {ordered_remove(&actor.mComponents, i)}
+    }
+    if (actor.mState == State.ATTACK && actor.mType == Type.PLAYER && 
+        actor.mFrame > 2.9 && actor.mFrame < 3) {
+        createComponent(actor)
+    }
 }
 
 generate_texture_name :: proc(actor: ^Actor) -> string {
@@ -213,4 +240,43 @@ checkEnemyState :: proc(enemy: ^Actor)
         enemy.mState = State.MOVE
     }
     enemy.mDirection = calculateDirection(enemy_hb, player_hb)
+}
+
+createComponent :: proc(actor: ^Actor) {
+    component := new(Component)
+    component.mTextures = game.textures["swoosh"]
+    component.mFrame = 0
+    component.mTexture = component.mTextures[int(component.mFrame)]
+    component.mDirection = actor.mDirection
+    component.mPos = RL.Vector2{actor.mHitbox.x-165, actor.mHitbox.y-138}
+    ms := actor.mMovementSpeed*2
+    switch component.mDirection {
+        case Direction.N:
+            component.mVel = RL.Vector2{0, -ms};
+        case Direction.W:
+            component.mVel = RL.Vector2{-ms, 0};
+        case Direction.E:
+            component.mVel = RL.Vector2{ms, 0};
+        case Direction.S:
+            component.mVel = RL.Vector2{0, ms};
+        case Direction.NE:
+            component.mVel = RL.Vector2{ms, -ms};
+        case Direction.NW:
+            component.mVel = RL.Vector2{-ms, -ms};
+        case Direction.SE:
+            component.mVel = RL.Vector2{ms, ms};
+        case Direction.SW:
+            component.mVel = RL.Vector2{-ms, ms};
+    }
+    switch component.mDirection {
+        case Direction.N: component.mVec = RL.Vector2{256, -40}
+        case Direction.NE: component.mVec = RL.Vector2{140, -85}
+        case Direction.E: component.mVec = RL.Vector2{-10, 0}
+        case Direction.SE: component.mVec = RL.Vector2{-80, 155}
+        case Direction.S: component.mVec = RL.Vector2{20, 292}
+        case Direction.SW: component.mVec = RL.Vector2{180, 350}
+        case Direction.W: component.mVec = RL.Vector2{280, 260}
+        case Direction.NW: component.mVec = RL.Vector2{320, 110}
+    } 
+    append(&actor.mComponents, component)
 }
