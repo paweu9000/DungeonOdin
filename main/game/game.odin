@@ -164,6 +164,10 @@ loadAllTextures :: proc() {
     // PROPS
     loadDirTextures(game, "/assets/prop/tiles/N/", "prop_tile_1_N")
     loadDirTextures(game, "/assets/prop/tiles/SE/", "prop_tile_1_SE")
+    loadDirTextures(game, "/assets/prop/brazier_lit/N/", "prop_brazier_lit_SE")
+
+    // COMPONENTS
+    loadDirTextures(game, "/assets/vfx/swoosh", "swoosh")
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {

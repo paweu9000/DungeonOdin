@@ -6,7 +6,8 @@ Prop :: struct {
     mTexture: RL.Texture2D,
     mPosition: RL.Vector2,
     mTextures: [dynamic]RL.Texture2D,
-    mFrame: f32
+    mFrame: f32,
+    mSpeed: f32
 }
 
 Tile :: struct {
@@ -30,6 +31,7 @@ createProp :: proc(name: string, pos: RL.Vector2) -> ^Prop {
     prop := new(Prop)
     prop.mTextures = game.textures[name]
     prop.mFrame = 0
+    prop.mSpeed = 1.5
     prop.mTexture = prop.mTextures[i32(prop.mFrame)]
     prop.mPosition = pos
     return prop
@@ -58,6 +60,7 @@ initLevel :: proc() -> ^Level {
             append(&tileset1.mTiles, tile1)
             hb2 := RL.Rectangle{f32(j*256+117), f32(i*256+80), 20, 90}
             tile2 := createTile(true, hb2, game.textures["wall_1_N"][0], RL.Vector2{f32(j*256), f32(i*256)})
+            append(&tile2.mProps, createProp("prop_brazier_lit_SE", RL.Vector2{f32(j*256), f32(i*256)}))
             append(&tileset2.mTiles, tile2)
         }
     }
@@ -77,6 +80,7 @@ drawLevel :: proc(level: ^Level) {
             }
             for prop in tile.mProps {
                 RL.DrawTexture(prop.mTexture, i32(prop.mPosition.x), i32(prop.mPosition.y), RL.WHITE)
+                updateProp(prop)
             }
         }
     }
@@ -92,4 +96,12 @@ checkForWallCollision :: proc(actor: ^Actor, lvl: ^Level) -> bool {
         }
     }
     return false
+}
+
+updateProp :: proc(prop: ^Prop) {
+    prop.mFrame += game.deltaTime * f32(len(prop.mTextures)) * prop.mSpeed
+    if int(prop.mFrame) > len(prop.mTextures)-1 {
+        prop.mFrame = 0
+    }
+    prop.mTexture = prop.mTextures[int(prop.mFrame)]
 }
