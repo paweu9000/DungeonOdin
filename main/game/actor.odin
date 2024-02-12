@@ -62,7 +62,9 @@ update_actor :: proc(actor: ^Actor){
 
 draw_actor :: proc(actor: ^Actor) {
     circle := actor.mHitbox
-    RL.DrawCircle(i32(circle.x), i32(circle.y), circle.radius, circle.color)
+    if game.showHitbox {
+        RL.DrawCircle(i32(circle.x), i32(circle.y), circle.radius, circle.color)
+    }
     RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
 }
 

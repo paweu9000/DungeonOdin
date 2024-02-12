@@ -2,11 +2,19 @@ package GAME
 
 import RL "vendor:raylib"
 
+Prop :: struct {
+    mTexture: RL.Texture2D,
+    mPosition: RL.Vector2,
+    mTextures: [dynamic]RL.Texture2D,
+    mFrame: f32
+}
+
 Tile :: struct {
     isSolid: bool,
     mHitbox: RL.Rectangle,
     mTexture: RL.Texture2D,
-    mVec: RL.Vector2
+    mVec: RL.Vector2,
+    mProps: [dynamic]^Prop
 }
 
 Tileset :: struct {
@@ -16,6 +24,15 @@ Tileset :: struct {
 
 Level :: struct {
     mLayers: [dynamic]^Tileset
+}
+
+createProp :: proc(name: string, pos: RL.Vector2) -> ^Prop {
+    prop := new(Prop)
+    prop.mTextures = game.textures[name]
+    prop.mFrame = 0
+    prop.mTexture = prop.mTextures[i32(prop.mFrame)]
+    prop.mPosition = pos
+    return prop
 }
 
 createTile :: proc(solid: bool, hitbox: RL.Rectangle, texture: RL.Texture2D, vec: RL.Vector2) -> ^Tile {
@@ -36,6 +53,8 @@ initLevel :: proc() -> ^Level {
         for j in 0 ..< 10 {
             hb1 := RL.Rectangle{f32(j*256), f32(i*256), 256, 256}
             tile1 := createTile(false, hb1, game.textures["ground_1"][1], RL.Vector2{f32(j*256), f32(i*256)})
+            append(&tile1.mProps, createProp("prop_tile_1_N", RL.Vector2{f32(j*256-128), f32(i*256-128)}))
+            append(&tile1.mProps, createProp("prop_tile_1_N", RL.Vector2{f32(j*256+128), f32(i*256+128)}))
             append(&tileset1.mTiles, tile1)
             hb2 := RL.Rectangle{f32(j*256+117), f32(i*256+80), 20, 90}
             tile2 := createTile(true, hb2, game.textures["wall_1_N"][0], RL.Vector2{f32(j*256), f32(i*256)})
@@ -52,9 +71,12 @@ drawLevel :: proc(level: ^Level) {
     for layer in level.mLayers {
         for tile in layer.mTiles {
             RL.DrawTexture(tile.mTexture, i32(tile.mVec.x), i32(tile.mVec.y), RL.WHITE)
-            if tile.isSolid {
+            if tile.isSolid && game.showHitbox {
                 RL.DrawRectangleLines(i32(tile.mHitbox.x), i32(tile.mHitbox.y), 
                                 i32(tile.mHitbox.width), i32(tile.mHitbox.height), RL.PINK)
+            }
+            for prop in tile.mProps {
+                RL.DrawTexture(prop.mTexture, i32(prop.mPosition.x), i32(prop.mPosition.y), RL.WHITE)
             }
         }
     }
