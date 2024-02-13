@@ -83,7 +83,7 @@ sortByDrawOrder :: proc() {
 draw :: proc() {
     RL.BeginDrawing();
     RL.ClearBackground(RL.LIGHTGRAY);
-    drawLevel(game.level)
+    // drawLevel(game.level)
     for act in game.actors {
         draw_actor(act)
     }
@@ -161,6 +161,16 @@ loadAllTextures :: proc() {
     loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/NW/", "skeleton_attack_NW");
     loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/SW/", "skeleton_attack_SW");
 
+    // DEATH
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/E/", "skeleton_death_E");
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/W/", "skeleton_death_W");
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/S/", "skeleton_death_S");
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/N/", "skeleton_death_N");
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/NE/", "skeleton_death_NE");
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/SE/", "skeleton_death_SE");
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/NW/", "skeleton_death_NW");
+    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/SW/", "skeleton_death_SW");
+
     // PROPS
     loadDirTextures(game, "/assets/prop/tiles/N/", "prop_tile_1_N")
     loadDirTextures(game, "/assets/prop/tiles/SE/", "prop_tile_1_SE")
@@ -202,6 +212,14 @@ processWallCollision :: proc() {
         if checkForWallCollision(act, game.level) {
             act.mHitbox.x -= act.mVelocity.x
             act.mHitbox.y -= act.mVelocity.y
+        }
+    }
+}
+
+removeActor :: proc(actor: ^Actor) {
+    for ac, index in game.actors {
+        if actor == ac {
+            unordered_remove(&game.actors, index)
         }
     }
 }
