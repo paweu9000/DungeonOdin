@@ -34,7 +34,8 @@ Component :: struct {
     mPos: RL.Vector2,
     mVel: RL.Vector2,
     mVec: RL.Vector2,
-    mHitbox: Hitbox
+    mHitbox: Hitbox,
+    mDmg: i32
 }
 
 Actor :: struct {
@@ -48,7 +49,8 @@ Actor :: struct {
     mHitbox: Hitbox,
     mFrame, mMovementSpeed, mMass: f32,
     mComponents: [dynamic]^Component,
-    mHp: i32
+    mHp: i32,
+    mHitmap: map[^Component]bool
 }
 
 Player :: struct {
@@ -101,6 +103,7 @@ createPlayer :: proc() -> ^Player {
     player.mType = Type.PLAYER
     player.mMovementSpeed = 1.2
     player.mHp = 10
+    player.mHitmap = make(map[^Component]bool)
     player.mMass = 0.3
     player.mHitbox = Hitbox{418, 417, 10, RL.GREEN}
     player.mTextures = game.textures["player_idle_S"]
@@ -114,6 +117,7 @@ createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
     enemy.mDirection = Direction.S
     enemy.mState = State.IDLE
     enemy.mType = Type.ENEMY
+    enemy.mHitmap = make(map[^Component]bool)
     enemy.mCategory = category
     enemy.mMovementSpeed = 0.6
     enemy.mMass = 2.0
@@ -245,7 +249,10 @@ applyForce :: proc(actor: ^Actor, force: RL.Vector2)
 
 checkEnemyState :: proc(enemy: ^Actor)
 {
-    if enemy.mHp <= 0 {enemy.mState = State.DEATH}
+    if enemy.mHp <= 0 && enemy.mState != State.DEATH {
+        enemy.mState = State.DEATH
+        enemy.mFrame = 0
+    }
     if enemy.mState == State.DEATH do return
     player_hb := RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
     enemy_hb := RL.Vector2{enemy.mHitbox.x, enemy.mHitbox.y}
@@ -302,5 +309,6 @@ createComponent :: proc(actor: ^Actor) {
     } 
     hitbox := Hitbox{actor.mHitbox.x, actor.mHitbox.y, 15, RL.PINK}
     component.mHitbox = hitbox
+    component.mDmg = 1
     append(&actor.mComponents, component)
 }

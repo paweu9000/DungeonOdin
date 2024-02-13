@@ -64,6 +64,7 @@ update :: proc() {
     }
     processWallCollision()
     checkForCollision()
+    checkAttackCollision()
     sortByDrawOrder()
 }
 
@@ -212,6 +213,29 @@ processWallCollision :: proc() {
         if checkForWallCollision(act, game.level) {
             act.mHitbox.x -= act.mVelocity.x
             act.mHitbox.y -= act.mVelocity.y
+        }
+    }
+}
+
+checkAttackCollision :: proc() {
+    for ac1 in game.actors {
+        for ac2 in game.actors {
+            if ac1 == ac2 {continue}
+            for comp in ac1.mComponents {
+                ac2_hb := ac2.mHitbox
+                comp_hb := comp.mHitbox
+                _, ok := ac2.mHitmap[comp]
+                if ok {
+                    continue
+                }
+                else if RL.CheckCollisionCircles(RL.Vector2{comp_hb.x, comp_hb.y}, comp_hb.radius,
+                                            RL.Vector2{ac2_hb.x, ac2_hb.y}, ac2_hb.radius)
+                {
+                    val := true
+                    ac2.mHitmap[comp] = val
+                    ac2.mHp -= comp.mDmg
+                }
+            }
         }
     }
 }
