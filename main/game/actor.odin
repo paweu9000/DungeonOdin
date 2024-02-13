@@ -13,7 +13,7 @@ Direction :: enum {
 }
 
 State :: enum {
-    ATTACK, IDLE, MOVE
+    ATTACK, IDLE, MOVE, DEATH, DEAD
 }
 
 MonsterCategory :: enum {
@@ -33,7 +33,8 @@ Component :: struct {
     mFrame: f32,
     mPos: RL.Vector2,
     mVel: RL.Vector2,
-    mVec: RL.Vector2
+    mVec: RL.Vector2,
+    mHitbox: Hitbox
 }
 
 Actor :: struct {
@@ -47,6 +48,7 @@ Actor :: struct {
     mHitbox: Hitbox,
     mFrame, mMovementSpeed, mMass: f32,
     mComponents: [dynamic]^Component,
+    mHp: i32
 }
 
 Player :: struct {
@@ -69,6 +71,9 @@ update_actor :: proc(actor: ^Actor){
     update_textures(actor)
     update_frame(actor)
     actor.mDrawOrder = int(actor.mHitbox.y)
+    if actor.mState == State.DEAD {
+        removeActor(actor)
+    }
 }
 
 draw_actor :: proc(actor: ^Actor) {
@@ -78,7 +83,11 @@ draw_actor :: proc(actor: ^Actor) {
     }
     RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
     for comp in actor.mComponents {
-        // RL.DrawTexture(comp.mTexture, i32(comp.mPos.x), i32(comp.mPos.y), RL.BLACK)
+        if game.showHitbox {
+            c_hb := comp.mHitbox
+            fmt.println(c_hb.x, " , ", c_hb.y)
+            RL.DrawCircle(i32(c_hb.x), i32(c_hb.y), c_hb.radius, c_hb.color)
+        }
         src := RL.Rectangle{0, 0, 256, 256}
         dest := RL.Rectangle{comp.mPos.x, comp.mPos.y, 256, 256}
         
@@ -91,6 +100,7 @@ createPlayer :: proc() -> ^Player {
     player.mState = State.IDLE
     player.mType = Type.PLAYER
     player.mMovementSpeed = 1.2
+    player.mHp = 10
     player.mMass = 0.3
     player.mHitbox = Hitbox{418, 417, 10, RL.GREEN}
     player.mTextures = game.textures["player_idle_S"]
@@ -107,6 +117,7 @@ createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
     enemy.mCategory = category
     enemy.mMovementSpeed = 0.6
     enemy.mMass = 2.0
+    enemy.mHp = 3
     enemy.mHitbox = Hitbox{f32(RL.GetRandomValue(30, 1500)), f32(RL.GetRandomValue(30, 800)), 10, RL.RED}
     // enemy.mHitbox = Hitbox{500, 500, 10, RL.RED}
     enemy.mTextures = game.textures["skeleton_idle_S"]
@@ -164,10 +175,15 @@ update_frame :: proc(actor: ^Actor) {
     if int(actor.mFrame) < len(actor.mTextures) {
         actor.mFrame += game.deltaTime * f32(len(actor.mTextures)) * actor.mMovementSpeed * 1.5
     }
+    if int(actor.mFrame) > len(actor.mTextures)-1 && actor.mState == State.DEATH {
+        actor.mState = State.DEAD
+    }
     if int(actor.mFrame) > len(actor.mTextures)-1 {actor.mFrame = 0}
     actor.mCurrentTexture = actor.mTextures[int(actor.mFrame)]
     for i in 0..<len(actor.mComponents) {
         actor.mComponents[i].mPos += actor.mComponents[i].mVel
+        actor.mComponents[i].mHitbox.x += actor.mComponents[i].mVel[0]
+        actor.mComponents[i].mHitbox.y += actor.mComponents[i].mVel[1]
         actor.mComponents[i].mFrame += game.deltaTime * f32(len(actor.mComponents[i].mTextures)) * actor.mMovementSpeed * 5
         if (int(actor.mComponents[i].mFrame) > len(actor.mComponents[i].mTextures)-1) {ordered_remove(&actor.mComponents, i)}
     }
@@ -193,6 +209,10 @@ generate_texture_name :: proc(actor: ^Actor) -> string {
             part2 = "walk_";
         case State.ATTACK:
             part2 = "attack_";
+        case State.DEATH:
+            part2 = "death_"
+        case State.DEAD:
+            part2 = "death_"
     }
     part3: string
     switch (actor.mDirection)
@@ -225,6 +245,8 @@ applyForce :: proc(actor: ^Actor, force: RL.Vector2)
 
 checkEnemyState :: proc(enemy: ^Actor)
 {
+    if enemy.mHp <= 0 {enemy.mState = State.DEATH}
+    if enemy.mState == State.DEATH do return
     player_hb := RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
     enemy_hb := RL.Vector2{enemy.mHitbox.x, enemy.mHitbox.y}
     sub_enemy_hb := enemy_hb - player_hb
@@ -278,5 +300,7 @@ createComponent :: proc(actor: ^Actor) {
         case Direction.W: component.mVec = RL.Vector2{280, 260}
         case Direction.NW: component.mVec = RL.Vector2{320, 110}
     } 
+    hitbox := Hitbox{actor.mHitbox.x, actor.mHitbox.y, 15, RL.PINK}
+    component.mHitbox = hitbox
     append(&actor.mComponents, component)
 }
