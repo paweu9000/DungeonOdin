@@ -124,6 +124,16 @@ loadAllTextures :: proc() {
     loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/SW/", "player_attack_SW");
     loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/NW/", "player_attack_NW");
 
+    // DEATH
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/E/", "player_death_E");
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/W/", "player_death_W");
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/S/", "player_death_S");
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/N/", "player_death_N");
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/NE/", "player_death_NE");
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/SE/", "player_death_SE");
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/NW/", "player_death_NW");
+    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/SW/", "player_death_SW");
+
     // GROUND
     loadDirTextures(game, "/assets/environment/", "ground_1");
 

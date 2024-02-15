@@ -87,7 +87,6 @@ draw_actor :: proc(actor: ^Actor) {
     for comp in actor.mComponents {
         if game.showHitbox {
             c_hb := comp.mHitbox
-            fmt.println(c_hb.x, " , ", c_hb.y)
             RL.DrawCircle(i32(c_hb.x), i32(c_hb.y), c_hb.radius, c_hb.color)
         }
         src := RL.Rectangle{0, 0, 256, 256}
