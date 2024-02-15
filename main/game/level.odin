@@ -51,17 +51,24 @@ initLevel :: proc() -> ^Level {
     tileset1.layer = 1
     tileset2 := new(Tileset)
     tileset2.layer = 2
-    for i in 0 ..< 10 {
-        for j in 0 ..< 10 {
-            hb1 := RL.Rectangle{f32(j*256), f32(i*256), 256, 256}
-            tile1 := createTile(false, hb1, game.textures["ground_1"][1], RL.Vector2{f32(j*256), f32(i*256)})
-            append(&tile1.mProps, createProp("prop_tile_1_N", RL.Vector2{f32(j*256-128), f32(i*256-128)}))
-            append(&tile1.mProps, createProp("prop_tile_1_N", RL.Vector2{f32(j*256+128), f32(i*256+128)}))
+    for y in 0 ..< 60 {
+        for x in 0 ..< 60 {
+            // hb1 := RL.Rectangle{f32(j*256), f32(i*256), 256, 256}
+            // tile1 := createTile(false, hb1, game.textures["ground_1"][1], RL.Vector2{f32(j*64), f32(i*64)})
+            // append(&tileset1.mTiles, tile1)
+            hb1 := RL.Rectangle{f32(x*64), f32(y*64), 64, 64}
+            tile1 := createTile(false, hb1, game.textures["ground_1"][1], RL.Vector2{
+                f32((10 * 64) + (x-y) * (64/2)),
+                f32((-10 * 64) + (x+y) * (64/2))
+            })
             append(&tileset1.mTiles, tile1)
-            hb2 := RL.Rectangle{f32(j*256+117), f32(i*256+80), 20, 90}
-            tile2 := createTile(true, hb2, game.textures["wall_1_N"][0], RL.Vector2{f32(j*256), f32(i*256)})
-            append(&tile2.mProps, createProp("prop_brazier_lit_SE", RL.Vector2{f32(j*256), f32(i*256)}))
-            append(&tileset2.mTiles, tile2)
+            
+            if x % 3 == 0 && y % 3 == 0 {
+                hb2 := RL.Rectangle{f32(x*64), f32(y*128), 64, 128}
+                tile2 := createTile(true, hb2, game.textures["altar_1"][3], RL.Vector2{f32(x*64), f32(y*128)})
+                append(&tile2.mProps, createProp("prop_brazier_lit_SE", RL.Vector2{f32(x*64-96), f32(y*64-64)}))
+                append(&tileset2.mTiles, tile2)
+            }
         }
     }
     level := new(Level)

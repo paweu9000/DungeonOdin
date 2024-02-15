@@ -104,7 +104,7 @@ createPlayer :: proc() -> ^Player {
     player.mHp = 10
     player.mHitmap = make(map[^Component]bool)
     player.mMass = 0.3
-    player.mHitbox = Hitbox{418, 417, 10, RL.GREEN}
+    player.mHitbox = Hitbox{500, 500, 10, RL.GREEN}
     player.mTextures = game.textures["player_idle_S"]
     player.mFrame = 0;
     player.mCurrentTexture = player.mTextures[0];
