@@ -14,7 +14,8 @@ Game :: struct {
     player: ^Player,
     deltaTime: f32,
     level: ^Level,
-    showHitbox: bool
+    showHitbox: bool,
+    camera: RL.Camera2D
 }
 
 game := new(Game)
@@ -33,12 +34,26 @@ init :: proc() {
     player := createPlayer()
     append(&game.actors, player)
     game.player = player
+    game.camera = createCamera()
     enemy := createEnemy(MonsterCategory.SKELETON)
     append(&game.actors, enemy)
     enemy1 := createEnemy(MonsterCategory.SKELETON)
     append(&game.actors, enemy1)
     enemy2 := createEnemy(MonsterCategory.SKELETON)
     append(&game.actors, enemy2)
+}
+
+createCamera :: proc() -> RL.Camera2D {
+    camera: RL.Camera2D
+    camera.target = RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.x}
+    camera.offset = RL.Vector2{f32(game.width/2), f32(game.height/2)}
+    camera.rotation = 0
+    camera.zoom = 1
+    return camera
+}
+
+updateCamera :: proc() {
+    game.camera.target = RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
 }
 
 runLoop :: proc() {
@@ -65,6 +80,7 @@ update :: proc() {
     processWallCollision()
     checkForCollision()
     checkAttackCollision()
+    updateCamera()
     sortByDrawOrder()
 }
 
@@ -84,11 +100,15 @@ sortByDrawOrder :: proc() {
 draw :: proc() {
     RL.BeginDrawing();
     RL.ClearBackground(RL.LIGHTGRAY);
+    RL.BeginMode2D(game.camera)
     drawLevel(game.level)
     for act in game.actors {
         draw_actor(act)
     }
-    RL.DrawFPS(10, 10)
+    RL.DrawFPS(
+        i32(game.player.mHitbox.x) - game.width/2, 
+        i32(game.player.mHitbox.y) - game.height/2)
+    RL.EndMode2D()
     RL.EndDrawing();
 }
 
