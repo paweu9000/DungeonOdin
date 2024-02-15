@@ -84,7 +84,7 @@ sortByDrawOrder :: proc() {
 draw :: proc() {
     RL.BeginDrawing();
     RL.ClearBackground(RL.LIGHTGRAY);
-    // drawLevel(game.level)
+    drawLevel(game.level)
     for act in game.actors {
         draw_actor(act)
     }
@@ -135,7 +135,7 @@ loadAllTextures :: proc() {
     loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/SW/", "player_death_SW");
 
     // GROUND
-    loadDirTextures(game, "/assets/environment/", "ground_1");
+    loadDirTextures(game, "/assets/Infernus_Tiles/Building_Infernus_1/Floor_Lower/", "ground_1");
 
     // WALL
     loadDirTextures(game, "/assets/prop/wall1/N/", "wall_1_N");
@@ -189,6 +189,9 @@ loadAllTextures :: proc() {
 
     // COMPONENTS
     loadDirTextures(game, "/assets/vfx/swoosh/", "swoosh")
+
+    // ALTARS
+    loadDirTextures(game, "/assets/Infernus_Tiles/Altar1/", "altar_1");
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {
