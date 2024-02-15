@@ -49,7 +49,7 @@ Actor :: struct {
     mHitbox: Hitbox,
     mFrame, mMovementSpeed, mMass: f32,
     mComponents: [dynamic]^Component,
-    mHp: i32,
+    mHp, mMaxHp: i32,
     mHitmap: map[^Component]bool
 }
 
@@ -102,6 +102,7 @@ createPlayer :: proc() -> ^Player {
     player.mType = Type.PLAYER
     player.mMovementSpeed = 1.2
     player.mHp = 10
+    player.mMaxHp = 10
     player.mHitmap = make(map[^Component]bool)
     player.mMass = 0.3
     player.mHitbox = Hitbox{500, 500, 10, RL.GREEN}
@@ -121,6 +122,7 @@ createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
     enemy.mMovementSpeed = 0.6
     enemy.mMass = 2.0
     enemy.mHp = 3
+    enemy.mMaxHp = 3
     enemy.mHitbox = Hitbox{f32(RL.GetRandomValue(30, 1500)), f32(RL.GetRandomValue(30, 800)), 10, RL.RED}
     // enemy.mHitbox = Hitbox{500, 500, 10, RL.RED}
     enemy.mTextures = game.textures["skeleton_idle_S"]
