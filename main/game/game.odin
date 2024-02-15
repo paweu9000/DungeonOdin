@@ -15,7 +15,8 @@ Game :: struct {
     deltaTime: f32,
     level: ^Level,
     showHitbox: bool,
-    camera: RL.Camera2D
+    camera: RL.Camera2D,
+    healthpanel: ^HealthPanel
 }
 
 game := new(Game)
@@ -30,6 +31,7 @@ init :: proc() {
     RL.SetTargetFPS(144);
     drawLoadingScreen()
     loadAllTextures()
+    game.healthpanel = createHealthPanel()
     game.level = initLevel()
     player := createPlayer()
     append(&game.actors, player)
@@ -109,6 +111,7 @@ draw :: proc() {
         i32(game.player.mHitbox.x) - game.width/2, 
         i32(game.player.mHitbox.y) - game.height/2)
     RL.EndMode2D()
+    drawHealthPanel(game.healthpanel)
     RL.EndDrawing();
 }
 
@@ -212,6 +215,9 @@ loadAllTextures :: proc() {
 
     // ALTARS
     loadDirTextures(game, "/assets/Infernus_Tiles/Altar1/", "altar_1");
+
+    //UI
+    loadDirTextures(game, "/assets/ui/health_orb/", "health_orb");
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {
