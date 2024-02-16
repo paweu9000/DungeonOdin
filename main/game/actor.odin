@@ -165,15 +165,17 @@ process_player_input :: proc(player: ^Actor) {
     player.mState = State.ATTACK
     if RL.IsKeyDown(RL.KeyboardKey.SPACE) do return
     player.mState = State.MOVE
-    if (RL.IsKeyDown(RL.KeyboardKey.W) && RL.IsKeyDown(RL.KeyboardKey.D)) {player.mDirection = Direction.NE;}
-    else if (RL.IsKeyDown(RL.KeyboardKey.W) && RL.IsKeyDown(RL.KeyboardKey.A)) {player.mDirection = Direction.NW;}
-    else if (RL.IsKeyDown(RL.KeyboardKey.S) && RL.IsKeyDown(RL.KeyboardKey.A)) {player.mDirection = Direction.SW;}
-    else if (RL.IsKeyDown(RL.KeyboardKey.S) && RL.IsKeyDown(RL.KeyboardKey.D)) {player.mDirection = Direction.SE;}
-    else if (RL.IsKeyDown(RL.KeyboardKey.W)) {player.mDirection = Direction.N;}
-    else if (RL.IsKeyDown(RL.KeyboardKey.A)) {player.mDirection = Direction.W;}
-    else if (RL.IsKeyDown(RL.KeyboardKey.D))  {player.mDirection = Direction.E;}
-    else if (RL.IsKeyDown(RL.KeyboardKey.S)) {player.mDirection = Direction.S;}
-    else {player.mState = State.IDLE}
+    switch {
+        case RL.IsKeyDown(RL.KeyboardKey.W) && RL.IsKeyDown(RL.KeyboardKey.D): player.mDirection = Direction.NE
+        case RL.IsKeyDown(RL.KeyboardKey.W) && RL.IsKeyDown(RL.KeyboardKey.A): player.mDirection = Direction.NW
+        case RL.IsKeyDown(RL.KeyboardKey.S) && RL.IsKeyDown(RL.KeyboardKey.A): player.mDirection = Direction.SW
+        case RL.IsKeyDown(RL.KeyboardKey.S) && RL.IsKeyDown(RL.KeyboardKey.D): player.mDirection = Direction.SE
+        case RL.IsKeyDown(RL.KeyboardKey.W): player.mDirection = Direction.N
+        case RL.IsKeyDown(RL.KeyboardKey.A): player.mDirection = Direction.W
+        case RL.IsKeyDown(RL.KeyboardKey.D): player.mDirection = Direction.E
+        case RL.IsKeyDown(RL.KeyboardKey.S): player.mDirection = Direction.S
+        case: player.mState = State.IDLE
+    }
 }
 
 update_textures :: proc(actor: ^Actor) {
@@ -263,29 +265,30 @@ applyForce :: proc(actor: ^Actor, force: RL.Vector2)
 
 checkEnemyState :: proc(enemy: ^Actor)
 {
-    if int(enemy.mFrame) == len(enemy.mTextures)-1 && enemy.mState == .DEAD do return
-    if game.player.mState == .DEAD {
-        enemy.mState = .IDLE
+    switch {
+        case int(enemy.mFrame) == len(enemy.mTextures)-1 && enemy.mState == .DEAD:
+            return
+        case game.player.mState == .DEAD:
+            enemy.mState = .IDLE
+            return
+        case enemy.mHp <= 0 && enemy.mState != .DEATH:
+            enemy.mState = State.DEATH
+            enemy.mFrame = 0
+            return
+        case enemy.mState == .DEATH || enemy.mState == .DEAD:
+            return
     }
-    if game.player.mState == .DEAD do return
-    if enemy.mHp <= 0 && enemy.mState != .DEATH  {
-        enemy.mState = State.DEATH
-        enemy.mFrame = 0
-    }
-    if enemy.mState == .DEATH || enemy.mState == .DEAD do return
     player_hb := RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
     enemy_hb := RL.Vector2{enemy.mHitbox.x, enemy.mHitbox.y}
     sub_enemy_hb := enemy_hb - player_hb
     res := sub_enemy_hb.x * sub_enemy_hb.x + sub_enemy_hb.y * sub_enemy_hb.y
-    if  res > 75000 {
-        enemy.mState = State.IDLE
-        return
-    }
-    else if res < 1300 {
-        enemy.mState = State.ATTACK
-    }
-    else {
-        enemy.mState = State.MOVE
+    switch {
+        case res > 75000:
+            enemy.mState = .IDLE
+        case res < 1300:
+            enemy.mState = .ATTACK
+        case:
+            enemy.mState = .MOVE
     }
     enemy.mDirection = calculateDirection(enemy_hb, player_hb)
 }
