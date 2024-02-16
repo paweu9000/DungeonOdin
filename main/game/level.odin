@@ -59,8 +59,7 @@ initLevel :: proc() -> ^Level {
             hb1 := RL.Rectangle{f32(x*64), f32(y*64), 64, 64}
             tile1 := createTile(false, hb1, game.textures["ground_1"][1], RL.Vector2{
                 f32((10 * 64) + (x-y) * (64/2)),
-                f32((-10 * 64) + (x+y) * (64/2))
-            })
+                f32((-10 * 64) + (x+y) * (64/2))})
             append(&tileset1.mTiles, tile1)
             
             if x % 3 == 0 && y % 3 == 0 {
