@@ -19,14 +19,16 @@ calculateDirection :: proc(hb1, hb2: RL.Vector2) -> Direction {
     angleDeg := angleRad * 180.0 / math.PI;
     if angleDeg < 0 {angleDeg += 360}
 
-    if ((angleDeg >= 0 && angleDeg < 22.5) || (angleDeg <= 360 && angleDeg > 337.5)) {return Direction.W}
-    else if (angleDeg >= 22.5 && angleDeg <= 67.5) {return Direction.NW}
-    else if (angleDeg > 67.5 && angleDeg <= 112.5) {return Direction.N}
-    else if (angleDeg > 112.5 && angleDeg <= 157.5) {return Direction.NE}
-    else if (angleDeg > 157.5 && angleDeg <= 202.5) {return Direction.E}
-    else if (angleDeg > 202.5 && angleDeg <= 247.5) {return Direction.SE}
-    else if (angleDeg > 247.5 && angleDeg <= 292.5) {return Direction.S}
-    else {return Direction.SW}
+    switch {
+        case (angleDeg >= 0 && angleDeg < 22.5) || (angleDeg <= 360 && angleDeg > 337.5): return Direction.W
+        case (angleDeg >= 22.5 && angleDeg <= 67.5): return Direction.NW
+        case (angleDeg > 67.5 && angleDeg <= 112.5): return Direction.N
+        case (angleDeg > 112.5 && angleDeg <= 157.5): return Direction.NE
+        case (angleDeg > 157.5 && angleDeg <= 202.5): return Direction.E
+        case (angleDeg > 202.5 && angleDeg <= 247.5): return Direction.SE
+        case (angleDeg > 247.5 && angleDeg <= 292.5): return Direction.S
+        case: return Direction.SW
+    }
 }
 
 calculateForce :: proc(hb1, hb2: Hitbox) -> VectorPair {
