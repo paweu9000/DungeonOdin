@@ -73,7 +73,7 @@ update_actor :: proc(actor: ^Actor){
     update_textures(actor)
     update_frame(actor)
     actor.mDrawOrder = int(actor.mHitbox.y)
-    if actor.mState == State.DEAD {
+    if actor.mState == State.DEAD && actor.mType != .PLAYER {
         removeActor(actor)
     }
 }
@@ -132,6 +132,9 @@ createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
 }
 
 process_actor_state :: proc(actor: ^Actor) {
+    if actor.mHp <= 0 {
+        actor.mState = actor.mState == .DEAD ? .DEAD : .DEATH
+    }
     hb := actor.mHitbox
     ms := actor.mMovementSpeed
     if actor.mState != State.MOVE do return
@@ -158,6 +161,7 @@ process_actor_state :: proc(actor: ^Actor) {
 }
 
 process_player_input :: proc(player: ^Actor) {
+    if player.mState == State.DEATH || player.mState == State.DEAD do return
     player.mState = State.ATTACK
     if RL.IsKeyDown(RL.KeyboardKey.SPACE) do return
     player.mState = State.MOVE
@@ -177,24 +181,33 @@ update_textures :: proc(actor: ^Actor) {
 }
 
 update_frame :: proc(actor: ^Actor) {
+    if actor.mState == .DEAD do return
     if int(actor.mFrame) < len(actor.mTextures) {
         actor.mFrame += game.deltaTime * f32(len(actor.mTextures)) * actor.mMovementSpeed * 1.5
     }
     if int(actor.mFrame) > len(actor.mTextures)-1 && actor.mState == State.DEATH {
         actor.mState = State.DEAD
+        actor.mFrame -= 1
     }
-    if int(actor.mFrame) > len(actor.mTextures)-1 {actor.mFrame = 0}
+    if int(actor.mFrame) > len(actor.mTextures)-1 && actor.mState != State.DEATH {actor.mFrame = 0}
     actor.mCurrentTexture = actor.mTextures[int(actor.mFrame)]
-    for i in 0..<len(actor.mComponents) {
-        actor.mComponents[i].mPos += actor.mComponents[i].mVel
-        actor.mComponents[i].mHitbox.x += actor.mComponents[i].mVel[0]
-        actor.mComponents[i].mHitbox.y += actor.mComponents[i].mVel[1]
-        actor.mComponents[i].mFrame += game.deltaTime * f32(len(actor.mComponents[i].mTextures)) * actor.mMovementSpeed * 5
-        if (int(actor.mComponents[i].mFrame) > len(actor.mComponents[i].mTextures)-1) {ordered_remove(&actor.mComponents, i)}
-    }
-    if (actor.mState == State.ATTACK && actor.mType == Type.PLAYER && 
-        actor.mFrame > 2.9 && actor.mFrame < 3) {
-        createComponent(actor)
+    #partial switch (actor.mState) {
+        case .DEAD:
+            clear(&actor.mComponents)
+        case .DEATH:
+            clear(&actor.mComponents)
+        case:
+            for i in 0..<len(actor.mComponents) {
+                actor.mComponents[i].mPos += actor.mComponents[i].mVel
+                actor.mComponents[i].mHitbox.x += actor.mComponents[i].mVel[0]
+                actor.mComponents[i].mHitbox.y += actor.mComponents[i].mVel[1]
+                actor.mComponents[i].mFrame += game.deltaTime * f32(len(actor.mComponents[i].mTextures)) * actor.mMovementSpeed * 5
+                if (int(actor.mComponents[i].mFrame) > len(actor.mComponents[i].mTextures)-1) {ordered_remove(&actor.mComponents, i)}
+            }
+            if (actor.mState == State.ATTACK && 
+                actor.mFrame > 2.9 && actor.mFrame < 3) {
+                createComponent(actor)
+            }
     }
 }
 
@@ -250,6 +263,8 @@ applyForce :: proc(actor: ^Actor, force: RL.Vector2)
 
 checkEnemyState :: proc(enemy: ^Actor)
 {
+    enemy.mState = State.IDLE
+    if game.player.mState == .DEAD do return
     if enemy.mHp <= 0 && enemy.mState != State.DEATH {
         enemy.mState = State.DEATH
         enemy.mFrame = 0

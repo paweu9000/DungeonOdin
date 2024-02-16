@@ -148,14 +148,14 @@ loadAllTextures :: proc() {
     loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/NW/", "player_attack_NW");
 
     // DEATH
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/E/", "player_death_E");
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/W/", "player_death_W");
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/S/", "player_death_S");
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/N/", "player_death_N");
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/NE/", "player_death_NE");
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/SE/", "player_death_SE");
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/NW/", "player_death_NW");
-    loadDirTextures(game, "/assets/enemy/warrior/warrior_special_death/SW/", "player_death_SW");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/E/", "player_death_E");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/W/", "player_death_W");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/S/", "player_death_S");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/N/", "player_death_N");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/NE/", "player_death_NE");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/SE/", "player_death_SE");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/NW/", "player_death_NW");
+    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/SW/", "player_death_SW");
 
     // GROUND
     loadDirTextures(game, "/assets/Infernus_Tiles/Building_Infernus_1/Floor_Lower/", "ground_1");
@@ -259,7 +259,8 @@ processWallCollision :: proc() {
 checkAttackCollision :: proc() {
     for ac1 in game.actors {
         for ac2 in game.actors {
-            if ac1 == ac2 {continue}
+            if ac1 == ac2 || ac1.mType == ac2.mType {continue}
+            if ac2.mHp <= 0 {continue}
             for comp in ac1.mComponents {
                 ac2_hb := ac2.mHitbox
                 comp_hb := comp.mHitbox

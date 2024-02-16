@@ -39,6 +39,7 @@ createHealthPanel :: proc() -> ^HealthPanel {
 }
 
 drawHealthPanel :: proc(panel: ^HealthPanel) {
+    panel.mOrb.mFillPercent = int(f32(game.player.mHp) / f32(game.player.mMaxHp) * 100)
     DrawOrb(panel.mOrb, panel.mPos)
     RL.DrawTexture(panel.mTexture, i32(panel.mPos[0]), i32(panel.mPos[1]), RL.WHITE)
     RL.DrawTexture(panel.mOrb.mTexture, i32(panel.mOrb.mPos[0]), i32(panel.mOrb.mPos[1]), RL.WHITE)
