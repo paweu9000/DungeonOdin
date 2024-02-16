@@ -263,13 +263,16 @@ applyForce :: proc(actor: ^Actor, force: RL.Vector2)
 
 checkEnemyState :: proc(enemy: ^Actor)
 {
-    enemy.mState = State.IDLE
+    if int(enemy.mFrame) == len(enemy.mTextures)-1 && enemy.mState == .DEAD do return
+    if game.player.mState == .DEAD {
+        enemy.mState = .IDLE
+    }
     if game.player.mState == .DEAD do return
-    if enemy.mHp <= 0 && enemy.mState != State.DEATH {
+    if enemy.mHp <= 0 && enemy.mState != .DEATH  {
         enemy.mState = State.DEATH
         enemy.mFrame = 0
     }
-    if enemy.mState == State.DEATH do return
+    if enemy.mState == .DEATH || enemy.mState == .DEAD do return
     player_hb := RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
     enemy_hb := RL.Vector2{enemy.mHitbox.x, enemy.mHitbox.y}
     sub_enemy_hb := enemy_hb - player_hb
