@@ -39,6 +39,7 @@ Component :: struct {
 }
 
 Actor :: struct {
+    mID: int,
     mDrawOrder: int,
     mVelocity: RL.Vector2,
     mType: Type,
@@ -63,7 +64,7 @@ Enemy :: struct {
 }
 
 update_actor :: proc(actor: ^Actor){
-    if actor.mType == Type.PLAYER {
+    if actor.mType == Type.PLAYER && actor.mID == game.client_id {
         process_player_input(actor)
     }
     else {
@@ -96,8 +97,9 @@ draw_actor :: proc(actor: ^Actor) {
     }
 }
 
-createPlayer :: proc() -> ^Player {
+createPlayer :: proc(id: int) -> ^Player {
     player := new(Player)
+    player.mID = id
     player.mState = State.IDLE
     player.mType = Type.PLAYER
     player.mMovementSpeed = 1.2
@@ -184,6 +186,7 @@ update_textures :: proc(actor: ^Actor) {
 
 update_frame :: proc(actor: ^Actor) {
     if actor.mState == .DEAD do return
+    if actor.mType == .PLAYER && game.client_id != actor.mID do return
     if int(actor.mFrame) < len(actor.mTextures) {
         actor.mFrame += game.deltaTime * f32(len(actor.mTextures)) * actor.mMovementSpeed * 1.5
     }

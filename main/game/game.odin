@@ -5,6 +5,8 @@ import "core:fmt"
 import "core:os"
 import "core:strings"
 import "core:slice"
+import "core:net"
+import "core:time"
 
 Game :: struct {
     width: i32,
@@ -16,14 +18,15 @@ Game :: struct {
     level: ^Level,
     showHitbox: bool,
     camera: RL.Camera2D,
-    healthpanel: ^HealthPanel
+    healthpanel: ^HealthPanel,
+    client_id: int
 }
 
 game := new(Game)
 
 init :: proc() {
-    game.width = 1600
-    game.height = 900
+    game.width = 960
+    game.height = 540
     game.showHitbox = false
     game.textures = make(map[string][dynamic]RL.Texture2D)
     RL.SetWindowState({.WINDOW_RESIZABLE, .VSYNC_HINT, .FULLSCREEN_MODE})
@@ -31,18 +34,24 @@ init :: proc() {
     RL.SetTargetFPS(144);
     drawLoadingScreen()
     loadAllTextures()
+    createClientId(game)
     game.healthpanel = createHealthPanel()
     game.level = initLevel()
-    player := createPlayer()
+    player := createPlayer(game.client_id)
     append(&game.actors, player)
     game.player = player
     game.camera = createCamera()
-    enemy := createEnemy(MonsterCategory.SKELETON)
-    append(&game.actors, enemy)
-    enemy1 := createEnemy(MonsterCategory.SKELETON)
-    append(&game.actors, enemy1)
-    enemy2 := createEnemy(MonsterCategory.SKELETON)
-    append(&game.actors, enemy2)
+    // enemy := createEnemy(MonsterCategory.SKELETON)
+    // append(&game.actors, enemy)
+    // enemy1 := createEnemy(MonsterCategory.SKELETON)
+    // append(&game.actors, enemy1)
+    // enemy2 := createEnemy(MonsterCategory.SKELETON)
+    // append(&game.actors, enemy2)
+}
+
+createClientId :: proc(game: ^Game) {
+    client_id := RL.GetRandomValue(1, 99000)
+    game.client_id = int(client_id)
 }
 
 createCamera :: proc() -> RL.Camera2D {
@@ -59,9 +68,13 @@ updateCamera :: proc() {
 }
 
 runLoop :: proc() {
+    socket, sock_err := net.make_bound_udp_socket(net.IP6_Loopback, game.client_id)
+    if sock_err != nil {panic("Failed to create socket!")}
+    defer net.close(socket)
     for !RL.WindowShouldClose() {
         game.deltaTime = RL.GetFrameTime()
         processInput()
+        handleNetworkTraffic(game, socket)
         update()
         draw()
     }
@@ -80,7 +93,7 @@ update :: proc() {
         update_actor(act)
     }
     processWallCollision()
-    checkForCollision()
+    // checkForCollision()
     checkAttackCollision()
     updateCamera()
     sortByDrawOrder()
