@@ -5,6 +5,9 @@ import "core:fmt"
 import "core:os"
 import "core:strings"
 import "core:slice"
+import "core:net"
+import "core:time"
+import "../managers"
 
 Game :: struct {
     width: i32,
@@ -16,7 +19,9 @@ Game :: struct {
     level: ^Level,
     showHitbox: bool,
     camera: RL.Camera2D,
-    healthpanel: ^HealthPanel
+    healthpanel: ^HealthPanel,
+    client_id: int,
+    sprite_manager: ^managers.SpriteManager
 }
 
 game := new(Game)
@@ -26,23 +31,30 @@ init :: proc() {
     game.height = 900
     game.showHitbox = false
     game.textures = make(map[string][dynamic]RL.Texture2D)
+    game.sprite_manager = managers.initializeSpriteManager()
     RL.SetWindowState({.WINDOW_RESIZABLE, .VSYNC_HINT, .FULLSCREEN_MODE})
     RL.InitWindow(game.width, game.height, "Dungeon")
     RL.SetTargetFPS(144);
     drawLoadingScreen()
     loadAllTextures()
+    createClientId(game)
     game.healthpanel = createHealthPanel()
     game.level = initLevel()
-    player := createPlayer()
+    player := createPlayer(game.client_id)
     append(&game.actors, player)
     game.player = player
     game.camera = createCamera()
-    enemy := createEnemy(MonsterCategory.SKELETON)
-    append(&game.actors, enemy)
-    enemy1 := createEnemy(MonsterCategory.SKELETON)
-    append(&game.actors, enemy1)
-    enemy2 := createEnemy(MonsterCategory.SKELETON)
-    append(&game.actors, enemy2)
+    // enemy := createEnemy(MonsterCategory.SKELETON)
+    // append(&game.actors, enemy)
+    // enemy1 := createEnemy(MonsterCategory.SKELETON)
+    // append(&game.actors, enemy1)
+    // enemy2 := createEnemy(MonsterCategory.SKELETON)
+    // append(&game.actors, enemy2)
+}
+
+createClientId :: proc(game: ^Game) {
+    client_id := RL.GetRandomValue(1, 99000)
+    game.client_id = int(client_id)
 }
 
 createCamera :: proc() -> RL.Camera2D {
@@ -59,9 +71,13 @@ updateCamera :: proc() {
 }
 
 runLoop :: proc() {
+    socket, sock_err := net.make_bound_udp_socket(net.IP6_Loopback, game.client_id)
+    if sock_err != nil {panic("Failed to create socket!")}
+    defer net.close(socket)
     for !RL.WindowShouldClose() {
         game.deltaTime = RL.GetFrameTime()
         processInput()
+        handleNetworkTraffic(game, socket)
         update()
         draw()
     }
@@ -80,7 +96,7 @@ update :: proc() {
         update_actor(act)
     }
     processWallCollision()
-    checkForCollision()
+    // checkForCollision()
     checkAttackCollision()
     updateCamera()
     sortByDrawOrder()
@@ -218,6 +234,8 @@ loadAllTextures :: proc() {
 
     //UI
     loadDirTextures(game, "/assets/ui/health_orb/", "health_orb");
+
+    managers.loadTextures(game.sprite_manager, "/assets/BaseHumanMale/", "player")
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {
