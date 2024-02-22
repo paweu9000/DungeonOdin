@@ -2,3 +2,7 @@ assets/
 
 ./main.exe
 main.exe
+server.exe
+./server.exe
+
+ols.json

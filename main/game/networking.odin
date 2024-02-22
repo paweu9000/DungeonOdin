@@ -64,8 +64,7 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
                 act.mFrame = f32(frame)
                 act.mDirection = cast(Direction)direction
                 act.mState = cast(State)state
-                act.mTextures = game.textures[generate_texture_name(act)]
-                act.mCurrentTexture = act.mTextures[int(frame)]
+                act.mTexture = generate_texture_name(act)
                 exists = true
                 break
             }
@@ -81,9 +80,8 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
             act.mHitmap = make(map[^Component]bool)
             act.mMass = 0.3
             act.mHitbox = Hitbox{f32(x), f32(y), 10, RL.BLUE}
-            act.mTextures = game.textures[generate_texture_name(act)]
+            act.mTexture = generate_texture_name(act)
             act.mFrame = f32(frame);
-            act.mCurrentTexture = act.mTextures[int(frame)];
             append(&game.actors, act)
         }
     }

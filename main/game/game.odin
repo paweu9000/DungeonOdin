@@ -7,6 +7,7 @@ import "core:strings"
 import "core:slice"
 import "core:net"
 import "core:time"
+import "../managers"
 
 Game :: struct {
     width: i32,
@@ -19,16 +20,18 @@ Game :: struct {
     showHitbox: bool,
     camera: RL.Camera2D,
     healthpanel: ^HealthPanel,
-    client_id: int
+    client_id: int,
+    sprite_manager: ^managers.SpriteManager
 }
 
 game := new(Game)
 
 init :: proc() {
-    game.width = 960
-    game.height = 540
+    game.width = 1600
+    game.height = 900
     game.showHitbox = false
     game.textures = make(map[string][dynamic]RL.Texture2D)
+    game.sprite_manager = managers.initializeSpriteManager()
     RL.SetWindowState({.WINDOW_RESIZABLE, .VSYNC_HINT, .FULLSCREEN_MODE})
     RL.InitWindow(game.width, game.height, "Dungeon")
     RL.SetTargetFPS(144);
@@ -231,6 +234,8 @@ loadAllTextures :: proc() {
 
     //UI
     loadDirTextures(game, "/assets/ui/health_orb/", "health_orb");
+
+    managers.loadTextures(game.sprite_manager, "/assets/BaseHumanMale/", "player")
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {

@@ -3,6 +3,7 @@ package GAME
 import RL "vendor:raylib"
 import "core:fmt"
 import "core:strings"
+import "../managers"
 
 Type :: enum {
     ENEMY, PLAYER
@@ -45,8 +46,7 @@ Actor :: struct {
     mType: Type,
     mDirection: Direction,
     mState: State,
-    mTextures: [dynamic]RL.Texture2D,
-    mCurrentTexture: RL.Texture2D,
+    mTexture: string,
     mHitbox: Hitbox,
     mFrame, mMovementSpeed, mMass: f32,
     mComponents: [dynamic]^Component,
@@ -67,7 +67,7 @@ update_actor :: proc(actor: ^Actor){
     if actor.mType == Type.PLAYER && actor.mID == game.client_id {
         process_player_input(actor)
     }
-    else {
+    else if actor.mType == .ENEMY {
         checkEnemyState(actor)
     }
     process_actor_state(actor)
@@ -84,7 +84,9 @@ draw_actor :: proc(actor: ^Actor) {
     if game.showHitbox {
         RL.DrawCircle(i32(circle.x), i32(circle.y), circle.radius, circle.color)
     }
-    RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
+    // RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
+    filename := actor.mType == .PLAYER ? "player" : "enemy"
+    managers.drawTexture(game.sprite_manager, filename, actor.mTexture, int(actor.mFrame), {circle.x-42, circle.y-56})
     for comp in actor.mComponents {
         if game.showHitbox {
             c_hb := comp.mHitbox
@@ -108,9 +110,8 @@ createPlayer :: proc(id: int) -> ^Player {
     player.mHitmap = make(map[^Component]bool)
     player.mMass = 0.3
     player.mHitbox = Hitbox{500, 500, 10, RL.GREEN}
-    player.mTextures = game.textures["player_idle_S"]
+    player.mTexture = "player_idle_S"
     player.mFrame = 0;
-    player.mCurrentTexture = player.mTextures[0];
     return player
 }
 
@@ -127,9 +128,8 @@ createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
     enemy.mMaxHp = 3
     enemy.mHitbox = Hitbox{f32(RL.GetRandomValue(30, 1500)), f32(RL.GetRandomValue(30, 800)), 10, RL.RED}
     // enemy.mHitbox = Hitbox{500, 500, 10, RL.RED}
-    enemy.mTextures = game.textures["skeleton_idle_S"]
+    enemy.mTexture = "skeleton_idle_S"
     enemy.mFrame = 0
-    enemy.mCurrentTexture = enemy.mTextures[0]
     return enemy
 }
 
@@ -181,21 +181,21 @@ process_player_input :: proc(player: ^Actor) {
 }
 
 update_textures :: proc(actor: ^Actor) {
-    actor.mTextures = game.textures[generate_texture_name(actor)]
+    actor.mTexture = generate_texture_name(actor)
 }
 
 update_frame :: proc(actor: ^Actor) {
     if actor.mState == .DEAD do return
     if actor.mType == .PLAYER && game.client_id != actor.mID do return
-    if int(actor.mFrame) < len(actor.mTextures) {
-        actor.mFrame += game.deltaTime * f32(len(actor.mTextures)) * actor.mMovementSpeed * 1.5
+    tex_len := managers.getTexturesLen(game.sprite_manager, actor.mTexture)
+    if int(actor.mFrame) < tex_len {
+        actor.mFrame += game.deltaTime * f32(tex_len) * actor.mMovementSpeed * 1.5
     }
-    if int(actor.mFrame) > len(actor.mTextures)-1 && actor.mState == State.DEATH {
+    if int(actor.mFrame) > tex_len-1 && actor.mState == State.DEATH {
         actor.mState = State.DEAD
         actor.mFrame -= 1
     }
-    if int(actor.mFrame) > len(actor.mTextures)-1 && actor.mState != State.DEATH {actor.mFrame = 0}
-    actor.mCurrentTexture = actor.mTextures[int(actor.mFrame)]
+    if int(actor.mFrame) > tex_len-1 && actor.mState != State.DEATH {actor.mFrame = 0}
     #partial switch (actor.mState) {
         case .DEAD:
             clear(&actor.mComponents)
@@ -269,7 +269,7 @@ applyForce :: proc(actor: ^Actor, force: RL.Vector2)
 checkEnemyState :: proc(enemy: ^Actor)
 {
     switch {
-        case int(enemy.mFrame) == len(enemy.mTextures)-1 && enemy.mState == .DEAD:
+        case int(enemy.mFrame) == managers.getTexturesLen(game.sprite_manager, enemy.mTexture)-1 && enemy.mState == .DEAD:
             return
         case game.player.mState == .DEAD:
             enemy.mState = .IDLE
