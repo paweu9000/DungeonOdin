@@ -51,7 +51,8 @@ Actor :: struct {
     mFrame, mMovementSpeed, mMass: f32,
     mComponents: [dynamic]^Component,
     mHp, mMaxHp: i32,
-    mHitmap: map[^Component]bool
+    mHitmap: map[^Component]bool,
+    mEquipment: ^Equipment
 }
 
 Player :: struct {
@@ -87,6 +88,7 @@ draw_actor :: proc(actor: ^Actor) {
     // RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
     filename := actor.mType == .PLAYER ? "player" : "enemy"
     managers.drawTexture(game.sprite_manager, filename, actor.mTexture, int(actor.mFrame), {circle.x-42, circle.y-56})
+    drawActorEquipment(actor)
     for comp in actor.mComponents {
         if game.showHitbox {
             c_hb := comp.mHitbox
@@ -109,6 +111,7 @@ createPlayer :: proc(id: int) -> ^Player {
     player.mMaxHp = 10
     player.mHitmap = make(map[^Component]bool)
     player.mMass = 0.3
+    player.mEquipment = createTestEquipment()
     player.mHitbox = Hitbox{500, 500, 10, RL.GREEN}
     player.mTexture = "player_idle_S"
     player.mFrame = 0;
