@@ -71,13 +71,13 @@ updateCamera :: proc() {
 }
 
 runLoop :: proc() {
-    socket, sock_err := net.make_bound_udp_socket(net.IP6_Loopback, game.client_id)
-    if sock_err != nil {panic("Failed to create socket!")}
-    defer net.close(socket)
+    // socket, sock_err := net.make_bound_udp_socket(net.IP6_Loopback, game.client_id)
+    // if sock_err != nil {panic("Failed to create socket!")}
+    // defer net.close(socket)
     for !RL.WindowShouldClose() {
         game.deltaTime = RL.GetFrameTime()
         processInput()
-        handleNetworkTraffic(game, socket)
+        // handleNetworkTraffic(game, socket)
         update()
         draw()
     }
@@ -132,47 +132,6 @@ draw :: proc() {
 }
 
 loadAllTextures :: proc() {
-    // PLAYER
-    // IDLE
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/N/", "player_idle_N");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/S/", "player_idle_S");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/W/", "player_idle_W");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/E/", "player_idle_E");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/SE/", "player_idle_SE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/NE/", "player_idle_NE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/SW/", "player_idle_SW");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_idle/NW/", "player_idle_NW");
-
-    // WALK
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/S/", "player_walk_S");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/N/", "player_walk_N");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/W/", "player_walk_W");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/E/", "player_walk_E");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/SE/", "player_walk_SE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/NE/", "player_walk_NE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/SW/", "player_walk_SW");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_walk/NW/", "player_walk_NW");
-
-    // ATTACK
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/S/", "player_attack_S");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/N/", "player_attack_N");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/W/", "player_attack_W");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/E/", "player_attack_E");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/SE/", "player_attack_SE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/NE/", "player_attack_NE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/SW/", "player_attack_SW");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_armed_attack/NW/", "player_attack_NW");
-
-    // DEATH
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/E/", "player_death_E");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/W/", "player_death_W");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/S/", "player_death_S");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/N/", "player_death_N");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/NE/", "player_death_NE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/SE/", "player_death_SE");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/NW/", "player_death_NW");
-    loadDirTextures(game, "/assets/playable character/warrior/warrior_special_death/SW/", "player_death_SW");
-
     // GROUND
     loadDirTextures(game, "/assets/Infernus_Tiles/Building_Infernus_1/Floor_Lower/", "ground_1");
 
@@ -235,7 +194,14 @@ loadAllTextures :: proc() {
     //UI
     loadDirTextures(game, "/assets/ui/health_orb/", "health_orb");
 
-    managers.loadTextures(game.sprite_manager, "/assets/BaseHumanMale/", "player")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/BaseHumanMale/", "player")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/BluePants/", "bluepants1")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/BlueVest/", "bluevest1")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/BoneClub/", "boneclub1")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/BlackBoots/", "blackboots1")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/AhoulArmGuards/", "ahoularmguards1")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/DrkHelm/", "drkhelm1")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/DrkShldrPad/", "drkshoulderpad1")
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {
