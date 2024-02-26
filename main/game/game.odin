@@ -71,13 +71,13 @@ updateCamera :: proc() {
 }
 
 runLoop :: proc() {
-    // socket, sock_err := net.make_bound_udp_socket(net.IP6_Loopback, game.client_id)
-    // if sock_err != nil {panic("Failed to create socket!")}
-    // defer net.close(socket)
+    socket, sock_err := net.make_bound_udp_socket(net.IP6_Loopback, game.client_id)
+    if sock_err != nil {panic("Failed to create socket!")}
+    defer net.close(socket)
     for !RL.WindowShouldClose() {
         game.deltaTime = RL.GetFrameTime()
         processInput()
-        // handleNetworkTraffic(game, socket)
+        handleNetworkTraffic(game, socket)
         update()
         draw()
     }
@@ -202,6 +202,7 @@ loadAllTextures :: proc() {
     managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/AhoulArmGuards/", "ahoularmguards1")
     managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/DrkHelm/", "drkhelm1")
     managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/DrkShldrPad/", "drkshoulderpad1")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/AhoulSteelPlatedBelt/", "ahoulbelt")
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {

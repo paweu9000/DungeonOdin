@@ -13,6 +13,11 @@ Category :: enum {
     PLAYER, SKELETON, SLIME
 }
 
+EquipmentData :: struct {
+    weapon, belt, chest, arms: string, 
+    head, shoulders, boots, legs: string
+}
+
 ActorPayload :: struct {
     id: int,
     x: int,
@@ -20,10 +25,33 @@ ActorPayload :: struct {
     frame: int,
     direction: Direction,
     category: Category,
-    state: State
+    state: State,
+    equipment: EquipmentData
 }
 
-handleNetworkTraffic ::proc (game: ^Game, socket: net.UDP_Socket) {
+createEquipmentData :: proc(player: ^Player) -> EquipmentData {
+    eq := player.mEquipment
+    eqData := EquipmentData{eq.weapon.name, eq.belt.name, eq.chest.name, eq.arms.name,
+        eq.head.name, eq.shoulders.name, eq.boots.name, eq.legs.name}
+    return eqData
+}
+
+parseEquipmentData :: proc(eq_map: json.Object) -> EquipmentData {
+    weapon := eq_map["weapon"].(json.String)
+    belt := eq_map["belt"].(json.String)
+    chest := eq_map["chest"].(json.String)
+    arms := eq_map["arms"].(json.String)
+    head := eq_map["head"].(json.String)
+    shoulders := eq_map["shoulders"].(json.String)
+    boots := eq_map["boots"].(json.String)
+    legs := eq_map["legs"].(json.String)
+
+    pl_equipment := EquipmentData{weapon, belt, chest, arms, head, shoulders, boots, legs}
+
+    return pl_equipment
+}
+
+handleNetworkTraffic :: proc (game: ^Game, socket: net.UDP_Socket) {
     sendPlayerPayload(game, socket)
     handleResponsePayload(game, socket)
 }
@@ -31,7 +59,7 @@ handleNetworkTraffic ::proc (game: ^Game, socket: net.UDP_Socket) {
 sendPlayerPayload :: proc(game: ^Game, socket: net.UDP_Socket) {
     pl := game.player
     payload := ActorPayload{game.client_id, int(pl.mHitbox.x), int(pl.mHitbox.y),
-                            int(pl.mFrame), pl.mDirection, .PLAYER, pl.mState}
+                            int(pl.mFrame), pl.mDirection, .PLAYER, pl.mState, createEquipmentData(pl)}
     json_payload, err := json.marshal(payload)
     if err != nil {panic("There was an error creating actor payload")}
     bytes_written, send_err := net.send_udp(socket, json_payload[:], {net.IP6_Loopback, 8080})
@@ -55,6 +83,7 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
         direction := int(payload["direction"].(json.Float))
         category := int(payload["category"].(json.Float))
         state := int(payload["state"].(json.Float))
+        equipment := parseEquipmentData(payload["equipment"].(json.Object))
         
         exists := false
         for act in game.actors {
@@ -65,6 +94,7 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
                 act.mDirection = cast(Direction)direction
                 act.mState = cast(State)state
                 act.mTexture = generate_texture_name(act)
+                updateEquipmentFromParsedData(equipment, act.mEquipment)
                 exists = true
                 break
             }
@@ -82,6 +112,7 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
             act.mHitbox = Hitbox{f32(x), f32(y), 10, RL.BLUE}
             act.mTexture = generate_texture_name(act)
             act.mFrame = f32(frame);
+            act.mEquipment = createEquipmentFromParsedData(equipment)
             append(&game.actors, act)
         }
     }

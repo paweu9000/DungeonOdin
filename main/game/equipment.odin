@@ -43,6 +43,30 @@ createEquipment :: proc() -> ^Equipment {
     return new(Equipment)
 }
 
+createEquipmentFromParsedData :: proc(eq_data: EquipmentData) -> ^Equipment {
+    eq := createEquipment()
+    equipItem(eq, createItem(.LEGS, .NORMAL, eq_data.legs))
+    equipItem(eq, createItem(.CHEST, .NORMAL, eq_data.chest))
+    equipItem(eq, createItem(.WEAPON, .NORMAL, eq_data.weapon))
+    equipItem(eq, createItem(.BOOTS, .NORMAL, eq_data.boots))
+    equipItem(eq, createItem(.ARMS, .NORMAL, eq_data.arms))
+    equipItem(eq, createItem(.HEAD, .NORMAL, eq_data.head))
+    equipItem(eq, createItem(.SHOULDERS, .NORMAL, eq_data.shoulders))
+    equipItem(eq, createItem(.BELT, .NORMAL, eq_data.belt))
+    return eq
+}
+
+updateEquipmentFromParsedData :: proc(eq_data: EquipmentData, eq: ^Equipment) {
+    eq.arms.name = eq_data.arms
+    eq.chest.name = eq_data.chest
+    eq.legs.name = eq_data.legs
+    eq.head.name = eq_data.head
+    eq.boots.name = eq_data.boots
+    eq.shoulders.name = eq_data.shoulders
+    eq.belt.name = eq_data.belt
+    eq.weapon.name = eq_data.weapon
+}
+
 equipItem :: proc(equipment: ^Equipment, item: ^Item) {
     #partial switch item.type {
         case .ARMS: equipment.arms = item
@@ -66,12 +90,13 @@ createTestEquipment :: proc() -> ^Equipment {
     equipItem(eq, createItem(.ARMS, .NORMAL, "ahoularmguards1"))
     equipItem(eq, createItem(.HEAD, .NORMAL, "drkhelm1"))
     equipItem(eq, createItem(.SHOULDERS, .NORMAL, "drkshoulderpad1"))
+    equipItem(eq, createItem(.BELT, .NORMAL, "ahoulbelt"))
     return eq
 }
 
 drawActorEquipment :: proc(actor: ^Actor) {
     if actor.mType == .ENEMY do return
-    if actor.mType == .PLAYER && actor.mID == game.client_id {
+    if actor.mType == .PLAYER {
         eq := actor.mEquipment
         managers.drawTexture(game.sprite_manager, eq.legs.name, generateEquipmentName(actor, eq.legs.name), 
                             int(actor.mFrame), {actor.mHitbox.x-42, actor.mHitbox.y-56})
