@@ -27,8 +27,8 @@ Game :: struct {
 game := new(Game)
 
 init :: proc() {
-    game.width = 1600
-    game.height = 900
+    game.width = 900
+    game.height = 500
     game.showHitbox = false
     game.textures = make(map[string][dynamic]RL.Texture2D)
     game.sprite_manager = managers.initializeSpriteManager()
