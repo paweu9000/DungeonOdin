@@ -9,7 +9,8 @@ import rl "vendor:raylib"
 
 
 State :: struct {
-    current_players: map[int]^Player
+    current_players: map[int]^Player,
+    npcs: [dynamic]^Npc
 }
 
 EquipmentData :: struct {
@@ -28,15 +29,16 @@ Player :: struct {
     equipment: EquipmentData
 }
 
+state := new(State)
+
 main :: proc() {
-    state := new(State)
     state.current_players = make(map[int]^Player)
     server_port := 8080
     socket, err2 := net.make_bound_udp_socket(net.IP6_Loopback, server_port)
     if err2 != nil {panic("failed to make UDP socket2")}
     defer net.close(socket)
     net.bind(socket, {net.IP6_Loopback, server_port})
-
+    createNpc(.Hostile, "Lesser Skeleton", 1, 1.1)
     handleNetworkTraffic(socket, state)
 }
 
