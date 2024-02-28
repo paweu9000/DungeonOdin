@@ -38,7 +38,7 @@ main :: proc() {
     if err2 != nil {panic("failed to make UDP socket2")}
     defer net.close(socket)
     net.bind(socket, {net.IP6_Loopback, server_port})
-    createNpc(.Hostile, "Lesser Skeleton", 1, 1.1)
+    createNpc(.Hostile, "skeleton", 1, 1.1)
     handleNetworkTraffic(socket, state)
 }
 
@@ -61,6 +61,7 @@ handlePayload :: proc(socket: net.UDP_Socket, state: ^State) {
         sender_id := updatePlayers(mp, state)
         response := createResponse(state, sender_id)
         net.send_udp(socket, response, endpoint)
+        sendNpcPayload(socket, endpoint)
     }
 }
 
@@ -125,4 +126,11 @@ mapEquipment :: proc(eq_map: json.Object) -> EquipmentData {
 
     pl_equipment := EquipmentData{weapon, belt, chest, arms, head, shoulders, boots, legs}
     return pl_equipment
+}
+
+sendNpcPayload :: proc(socket: net.UDP_Socket, endpoint: net.Endpoint) {
+    for npc in state.npcs {
+        payload := createNpcPayload(npc)
+        net.send(socket, payload, endpoint)
+    }
 }

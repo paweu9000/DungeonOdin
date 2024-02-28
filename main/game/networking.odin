@@ -72,8 +72,13 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
     if recv_err != nil {log.debug("Failed to receive packet")}
     response_arr, err := json.parse(recv_message[:bytes_read])
     if err != nil {log.debug("Failed to parse response")}
-    json_array := response_arr.(json.Array)
+    #partial switch v in response_arr {
+        case json.Array: handlePlayerUpdates(response_arr.(json.Array))
+        case json.Object: handleEnemyUpdates(response_arr.(json.Object))
+    }
+}
 
+handlePlayerUpdates :: proc(json_array: json.Array) {
     for obj in json_array {
         payload := obj.(json.Object)
         id := int(payload["id"].(json.Float))
@@ -84,7 +89,7 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
         category := int(payload["category"].(json.Float))
         state := int(payload["state"].(json.Float))
         equipment := parseEquipmentData(payload["equipment"].(json.Object))
-        
+                
         exists := false
         for act in game.actors {
             if act.mID == id {
@@ -97,23 +102,28 @@ handleResponsePayload :: proc(game: ^Game, socket: net.UDP_Socket) {
                 updateEquipmentFromParsedData(equipment, act.mEquipment)
                 exists = true
                 break
+                }
+            }
+            if !exists {
+                act := new(Actor)
+                act.mID = id
+                act.mState = cast(State)state
+                act.mType = .PLAYER
+                act.mMovementSpeed = 2.4
+                act.mHp = 10
+                act.mMaxHp = 10
+                act.mHitmap = make(map[^Component]bool)
+                act.mMass = 0.3
+                act.mHitbox = Hitbox{f32(x), f32(y), 10, RL.BLUE}
+                act.mTexture = generate_texture_name(act)
+                act.mFrame = f32(frame);
+                act.mEquipment = createEquipmentFromParsedData(equipment)
+                append(&game.actors, act)
             }
         }
-        if !exists {
-            act := new(Actor)
-            act.mID = id
-            act.mState = cast(State)state
-            act.mType = .PLAYER
-            act.mMovementSpeed = 2.4
-            act.mHp = 10
-            act.mMaxHp = 10
-            act.mHitmap = make(map[^Component]bool)
-            act.mMass = 0.3
-            act.mHitbox = Hitbox{f32(x), f32(y), 10, RL.BLUE}
-            act.mTexture = generate_texture_name(act)
-            act.mFrame = f32(frame);
-            act.mEquipment = createEquipmentFromParsedData(equipment)
-            append(&game.actors, act)
-        }
-    }
+}
+
+handleEnemyUpdates :: proc(enemy: json.Object) {
+    //TODO
+    fmt.printf("%v\n", enemy)
 }
