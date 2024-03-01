@@ -27,8 +27,8 @@ Game :: struct {
 game := new(Game)
 
 init :: proc() {
-    game.width = 900
-    game.height = 500
+    game.width = 1600
+    game.height = 900
     game.showHitbox = false
     game.textures = make(map[string][dynamic]RL.Texture2D)
     game.sprite_manager = managers.initializeSpriteManager()
@@ -139,47 +139,6 @@ loadAllTextures :: proc() {
     loadDirTextures(game, "/assets/prop/wall1/N/", "wall_1_N");
     loadDirTextures(game, "/assets/prop/wall2/E/", "wall_2_E");
 
-    // SKELETON
-    // IDLE
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/E/", "skeleton_idle_E");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/W/", "skeleton_idle_W");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/S/", "skeleton_idle_S");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/N/", "skeleton_idle_N");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/NE/", "skeleton_idle_NE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/SE/", "skeleton_idle_SE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/NW/", "skeleton_idle_NW");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_idle/SW/", "skeleton_idle_SW");
-
-    // WALK
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/E/", "skeleton_walk_E");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/W/", "skeleton_walk_W");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/S/", "skeleton_walk_S");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/N/", "skeleton_walk_N");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/NE/", "skeleton_walk_NE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/SE/", "skeleton_walk_SE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/NW/", "skeleton_walk_NW");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_walk/SW/", "skeleton_walk_SW");
-
-    // ATTACK
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/E/", "skeleton_attack_E");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/W/", "skeleton_attack_W");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/S/", "skeleton_attack_S");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/N/", "skeleton_attack_N");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/NE/", "skeleton_attack_NE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/SE/", "skeleton_attack_SE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/NW/", "skeleton_attack_NW");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_default_attack/SW/", "skeleton_attack_SW");
-
-    // DEATH
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/E/", "skeleton_death_E");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/W/", "skeleton_death_W");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/S/", "skeleton_death_S");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/N/", "skeleton_death_N");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/NE/", "skeleton_death_NE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/SE/", "skeleton_death_SE");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/NW/", "skeleton_death_NW");
-    loadDirTextures(game, "/assets/enemy/skeleton/skeleton_special_death/SW/", "skeleton_death_SW");
-
     // PROPS
     loadDirTextures(game, "/assets/prop/tiles/N/", "prop_tile_1_N")
     loadDirTextures(game, "/assets/prop/tiles/SE/", "prop_tile_1_SE")
@@ -203,6 +162,7 @@ loadAllTextures :: proc() {
     managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/DrkHelm/", "drkhelm1")
     managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/DrkShldrPad/", "drkshoulderpad1")
     managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/AhoulSteelPlatedBelt/", "ahoulbelt")
+    managers.loadTextures(game.sprite_manager, "/assets/player_eq_assets/SkeletonWarrior1/", "skeleton1")
 }
 
 loadDirTextures :: proc(game: ^Game, path: string, name: string) {
