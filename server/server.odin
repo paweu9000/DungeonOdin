@@ -38,7 +38,7 @@ main :: proc() {
     if err2 != nil {panic("failed to make UDP socket2")}
     defer net.close(socket)
     net.bind(socket, {net.IP6_Loopback, server_port})
-    createNpc(.Hostile, "skeleton", 1, 1.1)
+    createNpc(.Hostile, "skeleton1", 1, 600, 600, 1.1)
     handleNetworkTraffic(socket, state)
 }
 

@@ -21,14 +21,17 @@ Npc :: struct {
     name: cstring,
     level: int,
     speed: f32,
+    x, y: int,
     droptable: []Item
 }
 
-createNpc :: proc(type: NpcType, name: cstring, level: int, speed: f32) {
+createNpc :: proc(type: NpcType, name: cstring, level, x, y: int, speed: f32) {
     npc := new(Npc)
     npc.id = get_next_id()
     npc.type = type
     npc.name = name
+    npc.x = x
+    npc.y = y
     npc.level = level
     npc.speed = speed
     append(&state.npcs, npc)

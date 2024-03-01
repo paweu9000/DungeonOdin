@@ -86,9 +86,11 @@ draw_actor :: proc(actor: ^Actor) {
         RL.DrawCircle(i32(circle.x), i32(circle.y), circle.radius, circle.color)
     }
     // RL.DrawTexture(actor.mCurrentTexture, i32(circle.x-128), i32(circle.y-127), RL.WHITE)
-    filename := actor.mType == .PLAYER ? "player" : "enemy"
+    filename := actor.mType == .PLAYER ? "player" : "skeleton1"
     managers.drawTexture(game.sprite_manager, filename, actor.mTexture, int(actor.mFrame), {circle.x-42, circle.y-56})
-    drawActorEquipment(actor)
+    if actor.mType != .ENEMY {
+        drawActorEquipment(actor)
+    }
     for comp in actor.mComponents {
         if game.showHitbox {
             c_hb := comp.mHitbox
@@ -131,7 +133,7 @@ createEnemy :: proc(category: MonsterCategory) -> ^Enemy {
     enemy.mMaxHp = 3
     enemy.mHitbox = Hitbox{f32(RL.GetRandomValue(30, 1500)), f32(RL.GetRandomValue(30, 800)), 10, RL.RED}
     // enemy.mHitbox = Hitbox{500, 500, 10, RL.RED}
-    enemy.mTexture = "skeleton_idle_S"
+    enemy.mTexture = "skeleton1_idle_S"
     enemy.mFrame = 0
     return enemy
 }
@@ -225,7 +227,7 @@ generate_texture_name :: proc(actor: ^Actor) -> string {
         case Type.PLAYER:
             part1 = "player_"
         case Type.ENEMY:
-            part1 = "skeleton_"
+            part1 = "skeleton1_"
     }
     part2: string
     switch actor.mState {
@@ -284,19 +286,19 @@ checkEnemyState :: proc(enemy: ^Actor)
         case enemy.mState == .DEATH || enemy.mState == .DEAD:
             return
     }
-    player_hb := RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
-    enemy_hb := RL.Vector2{enemy.mHitbox.x, enemy.mHitbox.y}
-    sub_enemy_hb := enemy_hb - player_hb
-    res := sub_enemy_hb.x * sub_enemy_hb.x + sub_enemy_hb.y * sub_enemy_hb.y
-    switch {
-        case res > 75000:
-            enemy.mState = .IDLE
-        case res < 1300:
-            enemy.mState = .ATTACK
-        case:
-            enemy.mState = .MOVE
-    }
-    enemy.mDirection = calculateDirection(enemy_hb, player_hb)
+    // player_hb := RL.Vector2{game.player.mHitbox.x, game.player.mHitbox.y}
+    // enemy_hb := RL.Vector2{enemy.mHitbox.x, enemy.mHitbox.y}
+    // sub_enemy_hb := enemy_hb - player_hb
+    // res := sub_enemy_hb.x * sub_enemy_hb.x + sub_enemy_hb.y * sub_enemy_hb.y
+    // switch {
+    //     case res > 75000:
+    //         enemy.mState = .IDLE
+    //     case res < 1300:
+    //         enemy.mState = .ATTACK
+    //     case:
+    //         enemy.mState = .MOVE
+    // }
+    // enemy.mDirection = calculateDirection(enemy_hb, player_hb)
 }
 
 createComponent :: proc(actor: ^Actor) {

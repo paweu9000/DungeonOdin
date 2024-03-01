@@ -4,6 +4,7 @@ import "core:net"
 import "core:encoding/json"
 import "core:fmt"
 import "core:log"
+import "core:strings"
 import RL "vendor:raylib"
 
 OFFSET_X :: 128
@@ -123,7 +124,23 @@ handlePlayerUpdates :: proc(json_array: json.Array) {
         }
 }
 
-handleEnemyUpdates :: proc(enemy: json.Object) {
-    //TODO
-    fmt.printf("%v\n", enemy)
+handleEnemyUpdates :: proc(enemy_json: json.Object) {
+    id := int(enemy_json["id"].(json.Float))
+    is_existing_enemy := false
+    for actor in game.actors {
+        if actor.mID == id {
+            actor.mHitbox.x = f32(enemy_json["x"].(json.Float))
+            actor.mHitbox.y = f32(enemy_json["y"].(json.Float))
+            is_existing_enemy = true
+        }
+    }
+    if !is_existing_enemy {
+        enemy := createEnemy(.SKELETON)
+        enemy.mID = id
+        enemy.mTexture = strings.concatenate({enemy_json["name"].(json.String), "_idle_S"})
+        enemy.mHitbox.x = f32(enemy_json["x"].(json.Float))
+        enemy.mHitbox.y = f32(enemy_json["y"].(json.Float))
+        enemy.mMovementSpeed = f32(enemy_json["speed"].(json.Float))
+        append(&game.actors, enemy)
+    }
 }
