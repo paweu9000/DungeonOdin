@@ -5,7 +5,6 @@ An attempt to make (M)MO game and learn more about networking.
 ## Table of Contents
 
 - [About](#about)
-- [Features](#features)
 - [Demo](#demo)
 
 ## About
